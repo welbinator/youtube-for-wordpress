@@ -42,7 +42,7 @@ function renderGridLayout(container, videos) {
 
     videos.forEach(video => {
         const videoElement = document.createElement("div");
-        videoElement.classList.add("youtube-video-card");
+        videoElement.classList.add("youtube-video-grid-item");
 
         const title = video.snippet.title;
         const description = video.snippet.description;

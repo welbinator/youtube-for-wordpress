@@ -32,7 +32,7 @@
   transition: transform 0.2s ease;
 }
 
-.youtube-video-card:hover {
+.youtube-video-grid-item:hover {
   transform: translateY(-4px);
 }
 
@@ -54,7 +54,7 @@
      object-fit: cover;
 }
 
-.youtube-video-card:hover .play-overlay {
+.youtube-video-grid-item:hover .play-overlay {
   opacity: 1;
 }
 
@@ -89,7 +89,7 @@
 }
 
 /* Ensure the entire container and wrapper take up full width */
-.youtube-video-card {
+.youtube-video-grid-item {
   width: 100%;
   background-color: #fff;
   border-radius: 8px;
@@ -98,7 +98,7 @@
   transition: transform 0.2s ease;
 }
 
-.youtube-video-card:hover {
+.youtube-video-grid-item:hover {
   transform: translateY(-4px);
 }
 
@@ -166,7 +166,7 @@
     padding-top: 14.25%;
     min-width: 325px;
   }
-  .youtube-video-card .video-iframe-wrapper {
+  .youtube-video-grid-item .video-iframe-wrapper {
     min-width: 325px;
   }
 }
