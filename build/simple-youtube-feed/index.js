@@ -29,13 +29,14 @@ function Edit({
   setAttributes
 }) {
   const {
-    layout = 'grid'
+    layout = 'grid',
+    maxVideos = 5
   } = attributes;
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Layout Settings', 'simple-youtube-feed'),
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select Layout', 'simple-youtube-feed'),
           value: layout,
           options: [{
@@ -48,11 +49,20 @@ function Edit({
           onChange: newLayout => setAttributes({
             layout: newLayout
           })
-        })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Number of videos to display', 'simple-youtube-feed'),
+          type: "number",
+          min: 1,
+          max: 50,
+          value: maxVideos,
+          onChange: newMax => setAttributes({
+            maxVideos: parseInt(newMax, 10) || 1
+          })
+        })]
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
       ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)(),
-      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Simple YouTube Feed – hello from the editor!', 'simple-youtube-feed')
+      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Simple YouTube Feed', 'simple-youtube-feed')
     })]
   });
 }
@@ -106,11 +116,13 @@ function save({
   attributes
 }) {
   const {
-    layout
+    layout,
+    maxVideos
   } = attributes;
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
     ..._wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save(),
     "data-layout": layout,
+    "data-max-videos": maxVideos,
     id: "youtube-feed-container"
   });
 }
@@ -197,7 +209,7 @@ module.exports = window["wp"]["i18n"];
   \********************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"},"maxVideos":{"type":"number","default":5}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
 
 /***/ })
 

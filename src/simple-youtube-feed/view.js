@@ -7,24 +7,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Retrieve the layout from the data attribute
+    // Retrieve the layout and max videos from the data attributes
     const layout = container.getAttribute('data-layout') || 'grid';
+    const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 5;
 
-    // Render based on the selected layout
+    // Render based on the selected layout and limit the number of videos
+    const videosToDisplay = youtubeFeedData.slice(0, maxVideos);
     if (layout === 'grid') {
-        renderGridLayout(container);
+        renderGridLayout(container, videosToDisplay);
     } else {
-        renderListLayout(container);
+        renderListLayout(container, videosToDisplay);
     }
 });
 
-function renderGridLayout(container) {
+function renderGridLayout(container, videos) {
     container.innerHTML = ""; // Clear previous content
     const gridContainer = document.createElement("div");
     gridContainer.classList.add("youtube-feed-grid");
     container.appendChild(gridContainer);
 
-    youtubeFeedData.forEach(video => {
+    videos.forEach(video => {
         const videoElement = document.createElement("div");
         videoElement.classList.add("youtube-video-card");
 
@@ -52,13 +54,13 @@ function renderGridLayout(container) {
     });
 }
 
-function renderListLayout(container) {
+function renderListLayout(container, videos) {
     container.innerHTML = ""; // Clear previous content
     const listContainer = document.createElement("div");
     listContainer.classList.add("youtube-feed-list");
     container.appendChild(listContainer);
 
-    youtubeFeedData.forEach(video => {
+    videos.forEach(video => {
         const videoElement = document.createElement("div");
         videoElement.classList.add("youtube-video-list-item");
 

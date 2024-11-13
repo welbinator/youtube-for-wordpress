@@ -14,6 +14,10 @@
         "layout": {
             "type": "string",
             "default": "grid"
+        },
+		"maxVideos": {
+            "type": "number",
+            "default": 5
         }
     },
 	"textdomain": "yt-for-wp",
