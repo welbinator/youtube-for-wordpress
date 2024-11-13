@@ -18,6 +18,10 @@
     "maxVideos": {
       "type": "number",
       "default": 5
+    },
+    "selectedPlaylist": {
+      "type": "string",
+      "default": ""
     }
   },
   "textdomain": "yt-for-wp",

@@ -1,22 +1,38 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("youtube-feed-container");
 
-    // Ensure container and YouTube feed data are available
-    if (!container || typeof youtubeFeedData === 'undefined' || youtubeFeedData.length === 0) {
-        container.innerHTML = "<p>No videos available.</p>";
+    // Ensure container is available
+    if (!container) {
         return;
     }
 
-    // Retrieve the layout and max videos from the data attributes
+    // Retrieve layout, max videos, and selected playlist from data attributes
     const layout = container.getAttribute('data-layout') || 'grid';
     const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 5;
+    const selectedPlaylist = container.getAttribute('data-selected-playlist');
+    console.log('Channel ID:', YT_FOR_WP.channelId);
+    console.log('API Key:', YT_FOR_WP.apiKey);
+    
+   // Construct the API URL based on selected playlist
+    let apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
 
-    // Render based on the selected layout and limit the number of videos
-    const videosToDisplay = youtubeFeedData.slice(0, maxVideos);
-    if (layout === 'grid') {
-        renderGridLayout(container, videosToDisplay);
+    if (selectedPlaylist) {
+        apiUrl += `&playlistId=${selectedPlaylist}`;
     } else {
-        renderListLayout(container, videosToDisplay);
+        apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
+    }
+
+
+    // Fetch videos
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    const videos = data.items || [];
+
+    // Render based on the selected layout
+    if (layout === 'grid') {
+        renderGridLayout(container, videos);
+    } else {
+        renderListLayout(container, videos);
     }
 });
 
@@ -32,7 +48,7 @@ function renderGridLayout(container, videos) {
 
         const title = video.snippet.title;
         const description = video.snippet.description;
-        const videoUrl = `https://www.youtube.com/embed/${video.id.videoId}`;
+        const videoUrl = `https://www.youtube.com/embed/${video.snippet.resourceId?.videoId || video.id.videoId}`;
 
         videoElement.innerHTML = `
             <div class="video-iframe-wrapper">
@@ -66,7 +82,7 @@ function renderListLayout(container, videos) {
 
         const title = video.snippet.title;
         const description = video.snippet.description;
-        const videoUrl = `https://www.youtube.com/embed/${video.id.videoId}`;
+        const videoUrl = `https://www.youtube.com/embed/${video.snippet.resourceId?.videoId || video.id.videoId}`;
 
         videoElement.innerHTML = `
             <div class="video-iframe-wrapper">

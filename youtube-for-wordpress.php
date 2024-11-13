@@ -38,3 +38,52 @@ namespace YouTubeForWP;
      );
  }
  add_action( 'admin_menu', __NAMESPACE__ . '\\add_admin_menu' );
+
+ function yt_for_wp_enqueue_scripts() {
+    wp_enqueue_script(
+        'yt-for-wp-view',
+        plugins_url('build/simple-youtube-feed/view.js', __FILE__),
+        [],
+        null,
+        true
+    );
+
+    // Corrected option keys
+    $channel_id = get_option('yt_for_wp_channel_id');
+    $api_key = get_option('yt_for_wp_api_key');
+
+    error_log("Channel ID: " . $channel_id);
+    error_log("API Key: " . $api_key);
+
+    if ($channel_id && $api_key) {
+        wp_localize_script('yt-for-wp-view', 'YT_FOR_WP', [
+            'channelId' => $channel_id,
+            'apiKey'    => $api_key,
+        ]);
+    } else {
+        error_log('Channel ID or API key is missing. Ensure they are set in the plugin settings.');
+    }
+}
+add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\yt_for_wp_enqueue_scripts');
+
+function yt_for_wp_enqueue_block_editor_assets() {
+    wp_enqueue_script(
+        'yt-for-wp-editor',
+        plugins_url('blocks/simple-youtube-feed/edit.js', __FILE__),
+        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'],
+        null,
+        true
+    );
+
+    // Corrected option keys
+    $channel_id = get_option('yt_for_wp_channel_id');
+    $api_key = get_option('yt_for_wp_api_key');
+
+    wp_localize_script('yt-for-wp-editor', 'YT_FOR_WP', [
+        'channelId' => $channel_id,
+        'apiKey'    => $api_key,
+    ]);
+}
+add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_block_editor_assets');
+
+
