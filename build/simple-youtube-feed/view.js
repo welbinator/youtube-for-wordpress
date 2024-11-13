@@ -14,8 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const layout = container.getAttribute('data-layout') || 'grid';
   const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 5;
   const selectedPlaylist = container.getAttribute('data-selected-playlist');
-  console.log('Channel ID:', YT_FOR_WP.channelId);
-  console.log('API Key:', YT_FOR_WP.apiKey);
 
   // Construct the API URL based on selected playlist
   let apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
@@ -47,7 +45,9 @@ function renderGridLayout(container, videos) {
     videoElement.classList.add("youtube-video-card");
     const title = video.snippet.title;
     const description = video.snippet.description;
-    const videoUrl = `https://www.youtube.com/embed/${video.snippet.resourceId?.videoId || video.id.videoId}`;
+    const videoId = video.snippet.resourceId?.videoId || video.id.videoId;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`; // Request HD preview
+
     videoElement.innerHTML = `
             <div class="video-iframe-wrapper">
                 <iframe
@@ -76,7 +76,9 @@ function renderListLayout(container, videos) {
     videoElement.classList.add("youtube-video-list-item");
     const title = video.snippet.title;
     const description = video.snippet.description;
-    const videoUrl = `https://www.youtube.com/embed/${video.snippet.resourceId?.videoId || video.id.videoId}`;
+    const videoId = video.snippet.resourceId?.videoId || video.id.videoId;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`; // Request HD preview
+
     videoElement.innerHTML = `
             <div class="video-iframe-wrapper">
                 <iframe

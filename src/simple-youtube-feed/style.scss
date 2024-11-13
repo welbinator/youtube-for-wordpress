@@ -63,6 +63,7 @@
 /* Video Info */
 .video-info {
     padding: 1rem;
+    width: 70%;
 }
 
 .video-title {
@@ -146,6 +147,7 @@
 		width: 100%;
 		padding-top: 56.25%; 
 		overflow: hidden;
+        aspect-ratio: 16 / 9;
 		
 	}
 }
@@ -156,10 +158,16 @@
         flex-direction: row;
 
 		.video-iframe-wrapper {
-			width: 25%;
+			width: 30%;
 			padding-top: 14.25%; 
-			min-width: 290px;
+			min-width: 325px;
 		}
+    }
+    .youtube-video-card {
+
+        .video-iframe-wrapper {
+            min-width: 325px;
+        }
     }
 }
 
@@ -180,30 +188,7 @@
     object-fit: cover;
 }
 
-/* Play icon overlay */
-.thumbnail-wrapper .play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
 
-.thumbnail-wrapper:hover .play-overlay {
-    opacity: 1;
-}
-
-.play-icon {
-    width: 48px;
-    height: 48px;
-    fill: white;
-}
 
 /* Video details */
 .video-details {
