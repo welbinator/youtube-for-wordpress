@@ -110,7 +110,7 @@ function renderCarouselLayout(container, videos) {
                             allowfullscreen
                         ></iframe>
                         <div class="video-info">
-                            <h2>${video.snippet.title}</h2>
+                            <h2 class="video-title">${video.snippet.title}</h2>
                             <p>${video.snippet.description}</p>
                         </div>
                     </div>
