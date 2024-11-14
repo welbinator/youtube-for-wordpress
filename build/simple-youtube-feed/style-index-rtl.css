@@ -2,6 +2,13 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/simple-youtube-feed/style.scss ***!
   \***********************************************************************************************************************************************************************************************************************************************************/
 /* Main Container */
+.youtube-search-container {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 #youtube-feed-container {
   max-width: 1200px;
   margin: 0 auto;

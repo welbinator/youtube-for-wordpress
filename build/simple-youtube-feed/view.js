@@ -43,6 +43,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const searchButton = document.createElement("button");
     searchButton.textContent = "Search";
     searchButton.classList.add("youtube-search-button");
+
+    // Event listener for Enter key press on search bar
+    searchBar.addEventListener("keypress", event => {
+      if (event.key === "Enter") {
+        event.preventDefault(); // Prevent form submission if inside a form
+        searchButton.click(); // Trigger search button click
+      }
+    });
     searchButton.addEventListener("click", async () => {
       const keyword = searchBar.value.trim();
       const videos = await fetchVideos(keyword);
