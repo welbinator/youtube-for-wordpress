@@ -69,7 +69,7 @@ add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\yt_for_wp_enqueue_scripts');
 function yt_for_wp_enqueue_block_editor_assets() {
     wp_enqueue_script(
         'yt-for-wp-editor',
-        plugins_url('blocks/simple-youtube-feed/edit.js', __FILE__),
+        plugins_url('src/simple-youtube-feed/edit.js', __FILE__),
         ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'],
         null,
         true
