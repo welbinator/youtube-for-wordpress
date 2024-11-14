@@ -45,7 +45,7 @@ function render_settings_page() {
             <table class="form-table">
                 <tr valign="top">
                     <th scope="row"><?php esc_html_e( 'YouTube API Key', 'yt-for-wp' ); ?></th>
-                    <td><input type="text" name="yt_for_wp_api_key" value="<?php echo esc_attr( $api_key ); ?>" /></td>
+                    <td><input type="password" name="yt_for_wp_api_key" value="<?php echo esc_attr( $api_key ); ?>" /></td>
                 </tr>
                 <tr valign="top">
                     <th scope="row"><?php esc_html_e( 'YouTube Channel ID', 'yt-for-wp' ); ?></th>
