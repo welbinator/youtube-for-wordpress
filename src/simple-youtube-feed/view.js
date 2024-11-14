@@ -2,13 +2,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("youtube-feed-container");
     const enableSearch = container.getAttribute('data-enable-search') === 'true';
 
-    // Ensure container is available
+    // Ensure container is available and not already initialized
     if (!container || container.hasAttribute('data-initialized')) {
         return;
     }
 
     container.setAttribute('data-initialized', 'true');
-
+    
     const layout = container.getAttribute('data-layout') || 'grid';
     const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
     const selectedPlaylist = container.getAttribute('data-selected-playlist');
@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Function to perform API fetch
     async function fetchVideos(searchQuery = '') {
+        
         let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
         
         if (selectedPlaylist) {
@@ -32,8 +33,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return data.items || [];
     }
 
-    // Render search bar if enabled
-    if (enableSearch && !document.querySelector(".youtube-search-container")) {
+    // Render the search bar immediately if enabled
+    if (enableSearch) {
         const searchContainer = document.createElement("div");
         searchContainer.classList.add("youtube-search-container");
 
@@ -46,13 +47,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         searchButton.textContent = "Search";
         searchButton.classList.add("youtube-search-button");
 
+        // Event listener for Enter key press on search bar
         searchBar.addEventListener("keypress", (event) => {
             if (event.key === "Enter") {
-                event.preventDefault(); // Prevent form submission if inside a form
-                searchButton.click(); // Trigger search button click
+                event.preventDefault();
+                searchButton.click();
             }
         });
 
+        // Event listener for search button click
         searchButton.addEventListener("click", async () => {
             const keyword = searchBar.value.trim();
             const videos = await fetchVideos(keyword);
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         searchContainer.appendChild(searchBar);
         searchContainer.appendChild(searchButton);
-        container.appendChild(searchContainer);
+        container.appendChild(searchContainer); // Append the search container to the main container
     }
 
     // Initial video load
@@ -70,86 +73,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function renderVideos(container, videos, layout) {
-    container.innerHTML = "";
-
-    if (layout === "carousel") {
-        renderCarouselLayout(container, videos);
-    } else {
-        const videoContainer = document.createElement("div");
-        videoContainer.classList.add(layout === "grid" ? "youtube-feed-grid" : "youtube-feed-list");
-        container.appendChild(videoContainer);
-
-        videos.forEach(video => {
-            const videoElement = document.createElement("div");
-            videoElement.classList.add(layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item");
-
-            const title = video.snippet.title;
-            const description = video.snippet.description;
-            const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
-            const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-
-            videoElement.innerHTML = `
-                <div class="video-iframe-wrapper">
-                    <iframe
-                        src="${videoUrl}"
-                        title="${title}"
-                        class="video-iframe"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                    ></iframe>
-                </div>
-                <div class="video-info">
-                    <h2 class="video-title">${title}</h2>
-                    <p class="video-description">${description}</p>
-                </div>
-            `;
-
-            videoContainer.appendChild(videoElement);
-        });
+    
+    // Clear out any existing videos without affecting the search bar
+    const existingVideoContainer = container.querySelector(".video-container");
+    if (existingVideoContainer) {
+        existingVideoContainer.remove();
     }
-}
 
-function renderCarouselLayout(container, videos) {
-    container.innerHTML = `
-        <div class="swiper-container">
-            <div class="swiper-wrapper">
-                ${videos.map(video => `
-                    <div class="swiper-slide">
-                        <iframe
-                            src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
-                            title="${video.snippet.title}"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                        ></iframe>
-                        <div class="video-info">
-                            <h2 class="video-title">${video.snippet.title}</h2>
-                            <p>${video.snippet.description}</p>
-                        </div>
-                    </div>
-                `).join('')}
+    const videoContainer = document.createElement("div");
+    videoContainer.classList.add("video-container", layout === "grid" ? "youtube-feed-grid" : "youtube-feed-list");
+    container.appendChild(videoContainer);
+
+    videos.forEach(video => {
+        const videoElement = document.createElement("div");
+        videoElement.classList.add(layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item");
+
+        const title = video.snippet.title;
+        const description = video.snippet.description;
+        const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
+        const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
+
+        videoElement.innerHTML = `
+            <div class="video-iframe-wrapper">
+                <iframe
+                    src="${videoUrl}"
+                    title="${title}"
+                    class="video-iframe"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
             </div>
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-        </div>
-    `;
+            <div class="video-info">
+                <h2 class="video-title">${title}</h2>
+                <p class="video-description">${description}</p>
+            </div>
+        `;
 
-    new Swiper('.swiper-container', {
-        slidesPerView: 1,
-        spaceBetween: 10,
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-        loop: true,
-        breakpoints: {
-            640: { slidesPerView: 1, spaceBetween: 10 },
-            768: { slidesPerView: 2, spaceBetween: 20 },
-            1024: { slidesPerView: 3, spaceBetween: 30 },
-        }
+        videoContainer.appendChild(videoElement);
     });
 }
