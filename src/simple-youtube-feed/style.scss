@@ -70,7 +70,7 @@
 /* Video Info */
 .video-info {
     padding: 1rem;
-    width: 70%;
+    width: 100%;
 }
 
 .video-title {
@@ -223,3 +223,30 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
+
+
+/* Swiper stuff */
+.swiper-container {
+    width: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    overflow: hidden; /* Ensures content outside bounds is hidden */
+    position: relative; /* Positions Swiper elements correctly */
+}
+.swiper-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: auto; /* This allows Swiper to manage slide widths */
+}
+.swiper-slide iframe {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+}
+.swiper-button-next:after, .swiper-button-prev:after {
+    font-weight: bolder;
+}
+
+

@@ -40,6 +40,22 @@ namespace YouTubeForWP;
  add_action( 'admin_menu', __NAMESPACE__ . '\\add_admin_menu' );
 
  function yt_for_wp_enqueue_scripts() {
+    // Swiper JS and CSS
+    wp_enqueue_style(
+        'swiper-css',
+        'https://unpkg.com/swiper@10/swiper-bundle.min.css',
+        [],
+        null
+    );
+    
+    wp_enqueue_script(
+        'swiper-js',
+        'https://unpkg.com/swiper@10/swiper-bundle.min.js',
+        [],
+        null,
+        true
+    );
+    
     wp_enqueue_script(
         'yt-for-wp-view',
         plugins_url('build/simple-youtube-feed/view.js', __FILE__),
@@ -52,8 +68,6 @@ namespace YouTubeForWP;
     $channel_id = get_option('yt_for_wp_channel_id');
     $api_key = get_option('yt_for_wp_api_key');
 
-    error_log("Channel ID: " . $channel_id);
-    error_log("API Key: " . $api_key);
 
     if ($channel_id && $api_key) {
         wp_localize_script('yt-for-wp-view', 'YT_FOR_WP', [
