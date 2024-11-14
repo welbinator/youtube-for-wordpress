@@ -74,7 +74,7 @@
 /* Video Info */
 .video-info {
   padding: 1rem;
-  width: 100%;
+  width: 70%;
 }
 
 .video-title {
@@ -170,7 +170,7 @@
   }
   .youtube-video-list-item .video-iframe-wrapper {
     width: 30%;
-    padding-top: 14.25%;
+    padding-top: 0;
     min-width: 325px;
   }
   .youtube-video-grid-item .video-iframe-wrapper {
