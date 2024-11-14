@@ -56,13 +56,15 @@ namespace YouTubeForWP;
         true
     );
     
-    wp_enqueue_script(
-        'yt-for-wp-view',
-        plugins_url('build/simple-youtube-feed/view.js', __FILE__),
-        [],
-        null,
-        true
-    );
+    if (is_singular() && has_block('yt-for-wp/simple-youtube-feed')) {
+            wp_enqueue_script(
+            'yt-for-wp-view',
+            plugins_url('build/simple-youtube-feed/view.js', __FILE__),
+            [],
+            null,
+            true
+        );
+    }
 
     // Corrected option keys
     $channel_id = get_option('yt_for_wp_channel_id');
