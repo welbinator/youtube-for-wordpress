@@ -78,6 +78,9 @@ function Edit({
           }, {
             label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('List View', 'simple-youtube-feed'),
             value: 'list'
+          }, {
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Carousel', 'simple-youtube-feed'),
+            value: 'carousel'
           }],
           onChange: newLayout => setAttributes({
             layout: newLayout
