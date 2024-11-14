@@ -4,20 +4,29 @@
   \*****************************************/
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("youtube-feed-container");
-  const enableSearch = container.getAttribute('data-enable-search') === 'true';
 
   // Ensure container is available and not already initialized
-  if (!container || container.hasAttribute('data-initialized')) {
+  if (!container) {
+    console.warn("YouTube feed container not found.");
+    return;
+  }
+  if (container.hasAttribute('data-initialized')) {
     return;
   }
   container.setAttribute('data-initialized', 'true');
+  const enableSearch = container.getAttribute('data-enable-search') === 'true';
   const layout = container.getAttribute('data-layout') || 'grid';
   const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
   const selectedPlaylist = container.getAttribute('data-selected-playlist');
   const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
 
-  // Function to perform API fetch
+  // Function to perform API fetch, with caching by query term
+  const cache = {};
   async function fetchVideos(searchQuery = '') {
+    // Use cache to avoid duplicate queries for the same search term
+    if (cache[searchQuery]) {
+      return cache[searchQuery];
+    }
     let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
     if (selectedPlaylist) {
       apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${selectedPlaylist}&key=${YT_FOR_WP.apiKey}`;
@@ -29,10 +38,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     const response = await fetch(apiUrl);
     const data = await response.json();
-    return data.items || [];
+
+    // Store the response in cache
+    cache[searchQuery] = data.items || [];
+    return cache[searchQuery];
   }
 
-  // Render the search bar immediately if enabled
+  // Render the search bar if enabled
   if (enableSearch) {
     const searchContainer = document.createElement("div");
     searchContainer.classList.add("youtube-search-container");
@@ -43,27 +55,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const searchButton = document.createElement("button");
     searchButton.textContent = "Search";
     searchButton.classList.add("youtube-search-button");
-
-    // Event listener for Enter key press on search bar
     searchBar.addEventListener("keypress", event => {
       if (event.key === "Enter") {
-        event.preventDefault();
-        searchButton.click();
+        event.preventDefault(); // Prevent form submission if inside a form
+        searchButton.click(); // Trigger search button click
       }
     });
-
-    // Event listener for search button click
     searchButton.addEventListener("click", async () => {
       const keyword = searchBar.value.trim();
-      const videos = await fetchVideos(keyword);
-      renderVideos(container, videos, layout);
+      if (keyword) {
+        const videos = await fetchVideos(keyword);
+        renderVideos(container, videos, layout);
+      }
     });
     searchContainer.appendChild(searchBar);
     searchContainer.appendChild(searchButton);
-    container.appendChild(searchContainer); // Append the search container to the main container
+    container.appendChild(searchContainer);
   }
 
-  // Initial video load
+  // Initial video load, check if cached before calling API
   const initialVideos = await fetchVideos();
   renderVideos(container, initialVideos, layout);
 });
