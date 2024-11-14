@@ -1,10 +1,10 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
+import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
 
 export default function Edit({ attributes, setAttributes }) {
-    const { layout = 'grid', maxVideos = 5, selectedPlaylist = '' } = attributes;
+    const { layout = 'grid', maxVideos = 5, selectedPlaylist = '', enableSearch = false } = attributes;
     const [playlists, setPlaylists] = useState([]);
 
     // Fetch playlists based on the channel ID provided
@@ -67,6 +67,12 @@ export default function Edit({ attributes, setAttributes }) {
                         ]}
                         onChange={(newPlaylist) => setAttributes({ selectedPlaylist: newPlaylist })}
                     />
+                    <ToggleControl
+                        label={__('Enable User Search', 'simple-youtube-feed')}
+                        checked={enableSearch}
+                        onChange={(newSearchSetting) => setAttributes({ enableSearch: newSearchSetting })}
+                    />
+
                 </PanelBody>
             </InspectorControls>
 

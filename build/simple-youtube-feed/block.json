@@ -22,6 +22,10 @@
     "selectedPlaylist": {
       "type": "string",
       "default": ""
+    },
+    "enableSearch": {
+      "type": "boolean",
+      "default": false
     }
   },
   "textdomain": "yt-for-wp",
