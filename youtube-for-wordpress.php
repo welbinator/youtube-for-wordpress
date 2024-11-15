@@ -103,3 +103,27 @@ function yt_for_wp_enqueue_block_editor_assets() {
 add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_block_editor_assets');
 
 
+add_action('rest_api_init', function() {
+    register_rest_route('yt-for-wp/v1', '/get_cached_videos', [
+        'methods' => 'GET',
+        'callback' => 'get_cached_videos'
+    ]);
+    register_rest_route('yt-for-wp/v1', '/cache_videos', [
+        'methods' => 'POST',
+        'callback' => 'cache_videos'
+    ]);
+});
+
+function get_cached_videos(WP_REST_Request $request) {
+    $key = sanitize_text_field($request->get_param('key'));
+    $cached_data = get_transient($key);
+    return rest_ensure_response($cached_data ?: []);
+}
+
+function cache_videos(WP_REST_Request $request) {
+    $key = sanitize_text_field($request->get_param('key'));
+    $videos = $request->get_json_params()['videos'];
+    set_transient($key, $videos, DAY_IN_SECONDS);
+    return rest_ensure_response(['status' => 'cached']);
+}
+
