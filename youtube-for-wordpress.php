@@ -83,14 +83,15 @@ namespace YouTubeForWP;
 add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\yt_for_wp_enqueue_scripts');
 
 function yt_for_wp_enqueue_block_editor_assets() {
+   
     wp_enqueue_script(
-        'yt-for-wp-editor',
-        plugins_url('build/simple-youtube-feed/edit.js', __FILE__),
-        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-components'],
+        'yt-for-wp-editor', // Handle for the editor script
+        plugins_url('build/simple-youtube-feed/index.js', __FILE__), // Path to the compiled script
+        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'], // Dependencies
         YOUTUBE_FOR_WP_VERSION,
         true
     );
-
+    
     // Mark it as a module
     wp_script_add_data( 'yt-for-wp-editor', 'type', 'module' );
 
