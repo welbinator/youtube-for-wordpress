@@ -40,22 +40,3 @@ function register_simple_youtube_feed_block() {
     register_block_type_from_metadata( plugin_dir_path( __FILE__ ) . '../../build/simple-youtube-feed' );
 }
 add_action('init', __NAMESPACE__ . '\\register_simple_youtube_feed_block');
-
-/**
- * Enqueues the block's frontend assets and passes video data to JavaScript.
- */
-// function enqueue_youtube_feed_script() {
-//     // Enqueue the front-end script for displaying the YouTube feed.
-//     wp_enqueue_script(
-//         'simple-youtube-feed-view-script',
-//         plugin_dir_url( __FILE__ ) . '../../build/simple-youtube-feed/view.js',
-//         array(),
-//         YOUTUBE_FOR_WP_VERSION,
-//         true
-//     );
-
-//     // Fetch video data and pass it to the script.
-//     $video_data = fetch_youtube_feed_videos();
-//     wp_localize_script('simple-youtube-feed-view-script', 'youtubeFeedData', $video_data);
-// }
-// add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_youtube_feed_script');

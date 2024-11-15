@@ -35,7 +35,8 @@ function Edit({
     layout = 'grid',
     maxVideos = 5,
     selectedPlaylist = '',
-    enableSearch = false
+    enableSearch = false,
+    enablePlaylistFilter = false
   } = attributes;
   const [playlists, setPlaylists] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
 
@@ -46,16 +47,19 @@ function Edit({
         console.warn('Channel ID or API Key is missing.');
         return;
       }
-      console.log('Channel ID:', YT_FOR_WP.channelId);
-      console.log('API Key:', YT_FOR_WP.apiKey);
       try {
         const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`);
         const data = await response.json();
         if (data.items) {
-          setPlaylists(data.items.map(playlist => ({
+          setPlaylists([{
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('All Videos', 'simple-youtube-feed'),
+            value: ''
+          },
+          // Default option
+          ...data.items.map(playlist => ({
             label: playlist.snippet.title,
             value: playlist.id
-          })));
+          }))]);
         } else {
           console.warn('No playlists found or API quota exceeded.');
         }
@@ -94,21 +98,17 @@ function Edit({
           onChange: newMax => setAttributes({
             maxVideos: parseInt(newMax, 10) || 1
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select Playlist', 'simple-youtube-feed'),
-          value: selectedPlaylist,
-          options: [{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('All Videos', 'simple-youtube-feed'),
-            value: ''
-          }, ...playlists],
-          onChange: newPlaylist => setAttributes({
-            selectedPlaylist: newPlaylist
-          })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Enable User Search', 'simple-youtube-feed'),
           checked: enableSearch,
           onChange: newSearchSetting => setAttributes({
-            enableSearch: newSearchSetting
+            enableSearch: !!newSearchSetting
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Enable Playlist Filter', 'simple-youtube-feed'),
+          checked: enablePlaylistFilter,
+          onChange: newPlaylistFilter => setAttributes({
+            enablePlaylistFilter: !!newPlaylistFilter
           })
         })]
       })
@@ -171,7 +171,8 @@ function save({
     layout,
     maxVideos,
     selectedPlaylist,
-    enableSearch
+    enableSearch,
+    enablePlaylistFilter
   } = attributes;
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
     ..._wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save(),
@@ -179,6 +180,8 @@ function save({
     "data-max-videos": maxVideos,
     "data-selected-playlist": selectedPlaylist,
     "data-enable-search": enableSearch ? 'true' : 'false',
+    "data-enable-playlist-filter": enablePlaylistFilter ? 'true' : 'false' // Ensures string consistency
+    ,
     id: "youtube-feed-container"
   });
 }
@@ -275,7 +278,7 @@ module.exports = window["wp"]["i18n"];
   \********************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"},"maxVideos":{"type":"number","default":5},"selectedPlaylist":{"type":"string","default":""},"enableSearch":{"type":"boolean","default":false}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"},"maxVideos":{"type":"number","default":5},"selectedPlaylist":{"type":"string","default":""},"enableSearch":{"type":"boolean","default":false},"enablePlaylistFilter":{"type":"boolean","default":false}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
 
 /***/ })
 

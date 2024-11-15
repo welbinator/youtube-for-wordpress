@@ -26,6 +26,10 @@
     "enableSearch": {
       "type": "boolean",
       "default": false
+    },
+    "enablePlaylistFilter": {
+      "type": "boolean",
+      "default": false
     }
   },
   "textdomain": "yt-for-wp",

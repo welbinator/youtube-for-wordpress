@@ -4,7 +4,14 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
 
 export default function Edit({ attributes, setAttributes }) {
-    const { layout = 'grid', maxVideos = 5, selectedPlaylist = '', enableSearch = false } = attributes;
+    const { 
+        layout = 'grid', 
+        maxVideos = 5, 
+        selectedPlaylist = '', 
+        enableSearch = false, 
+        enablePlaylistFilter = false 
+    } = attributes;
+
     const [playlists, setPlaylists] = useState([]);
 
     // Fetch playlists based on the channel ID provided
@@ -14,18 +21,20 @@ export default function Edit({ attributes, setAttributes }) {
                 console.warn('Channel ID or API Key is missing.');
                 return;
             }
-			console.log('Channel ID:', YT_FOR_WP.channelId);
-			console.log('API Key:', YT_FOR_WP.apiKey);
-			
             try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`);
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
+                );
                 const data = await response.json();
-                
+
                 if (data.items) {
-                    setPlaylists(data.items.map(playlist => ({
-                        label: playlist.snippet.title,
-                        value: playlist.id
-                    })));
+                    setPlaylists([
+                        { label: __('All Videos', 'simple-youtube-feed'), value: '' }, // Default option
+                        ...data.items.map(playlist => ({
+                            label: playlist.snippet.title,
+                            value: playlist.id,
+                        })),
+                    ]);
                 } else {
                     console.warn('No playlists found or API quota exceeded.');
                 }
@@ -59,21 +68,16 @@ export default function Edit({ attributes, setAttributes }) {
                         value={maxVideos}
                         onChange={(newMax) => setAttributes({ maxVideos: parseInt(newMax, 10) || 1 })}
                     />
-                    <SelectControl
-                        label={__('Select Playlist', 'simple-youtube-feed')}
-                        value={selectedPlaylist}
-                        options={[
-                            { label: __('All Videos', 'simple-youtube-feed'), value: '' },
-                            ...playlists
-                        ]}
-                        onChange={(newPlaylist) => setAttributes({ selectedPlaylist: newPlaylist })}
-                    />
                     <ToggleControl
                         label={__('Enable User Search', 'simple-youtube-feed')}
                         checked={enableSearch}
-                        onChange={(newSearchSetting) => setAttributes({ enableSearch: newSearchSetting })}
+                        onChange={(newSearchSetting) => setAttributes({ enableSearch: !!newSearchSetting })}
                     />
-
+                    <ToggleControl
+                        label={__('Enable Playlist Filter', 'simple-youtube-feed')}
+                        checked={enablePlaylistFilter}
+                        onChange={(newPlaylistFilter) => setAttributes({ enablePlaylistFilter: !!newPlaylistFilter })}
+                    />
                 </PanelBody>
             </InspectorControls>
 
