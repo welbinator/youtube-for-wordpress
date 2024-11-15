@@ -262,7 +262,16 @@
     align-items: center;
     text-align: center;
     width: auto; /* This allows Swiper to manage slide widths */
+    padding-top: 40%;
 }
+
+@media (min-width: 640px) { 
+    .swiper-slide {
+        padding-top: 17%!important;
+    }
+}
+
+
 .swiper-slide iframe {
     width: 100%;
     height: 200px;
