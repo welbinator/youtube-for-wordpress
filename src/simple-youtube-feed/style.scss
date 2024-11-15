@@ -1,9 +1,18 @@
 /* Main Container */
-.youtube-search-container {
+.youtube-filter-container {
     display: flex;
     gap: 20px;
     align-items: center;
-    margin-bottom: 20px;
+    padding-block: 20px;
+}
+.youtube-search-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+}
+.youtube-playlist-dropdown {
+    max-width: 200px;
 }
 
 #youtube-feed-container {
