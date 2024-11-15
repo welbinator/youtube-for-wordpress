@@ -50,6 +50,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Render the "Load More" button only if there are more playlists to load
     function renderLoadMoreButton() {
         const filterContainer = document.querySelector(".youtube-filter-container");
+        if (!filterContainer) {
+            console.warn("Filter container not found for Load More button.");
+            return;
+        }
         const existingButton = document.querySelector(".load-more-button");
         
         if (existingButton) existingButton.remove();
@@ -98,6 +102,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const option = document.createElement("option");
                 option.value = id;
                 option.textContent = snippet.title;
+                if (id === selectedPlaylist) {
+                    option.selected = true; // Set default option if selected
+                }
                 dropdown.appendChild(option);
             });
 

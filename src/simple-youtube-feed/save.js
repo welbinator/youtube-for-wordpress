@@ -10,9 +10,8 @@ export default function save({ attributes }) {
             data-max-videos={maxVideos}
             data-selected-playlist={selectedPlaylist}
             data-enable-search={enableSearch ? 'true' : 'false'} 
-            data-enable-playlist-filter={enablePlaylistFilter ? 'true' : 'false'} // Ensures consistency with boolean value as string
+            data-enable-playlist-filter={enablePlaylistFilter ? 'true' : 'false'} // Ensures string consistency
             id="youtube-feed-container"
         ></div>
     );
 }
-

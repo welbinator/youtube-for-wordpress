@@ -102,13 +102,13 @@ function Edit({
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Enable User Search', 'simple-youtube-feed'),
           checked: enableSearch,
           onChange: newSearchSetting => setAttributes({
-            enableSearch: newSearchSetting
+            enableSearch: !!newSearchSetting
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Enable Playlist Filter', 'simple-youtube-feed'),
           checked: enablePlaylistFilter,
           onChange: newPlaylistFilter => setAttributes({
-            enablePlaylistFilter: newPlaylistFilter
+            enablePlaylistFilter: !!newPlaylistFilter
           })
         })]
       })
@@ -180,7 +180,7 @@ function save({
     "data-max-videos": maxVideos,
     "data-selected-playlist": selectedPlaylist,
     "data-enable-search": enableSearch ? 'true' : 'false',
-    "data-enable-playlist-filter": enablePlaylistFilter ? 'true' : 'false' // Ensures consistency with boolean value as string
+    "data-enable-playlist-filter": enablePlaylistFilter ? 'true' : 'false' // Ensures string consistency
     ,
     id: "youtube-feed-container"
   });
@@ -278,7 +278,7 @@ module.exports = window["wp"]["i18n"];
   \********************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"},"maxVideos":{"type":"number","default":5},"selectedPlaylist":{"type":"string","default":""},"enableSearch":{"type":"boolean","default":false}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"yt-for-wp/simple-youtube-feed","version":"0.1.0","title":"Simple Youtube Feed","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"layout":{"type":"string","default":"grid"},"maxVideos":{"type":"number","default":5},"selectedPlaylist":{"type":"string","default":""},"enableSearch":{"type":"boolean","default":false},"enablePlaylistFilter":{"type":"boolean","default":false}},"textdomain":"yt-for-wp","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
 
 /***/ })
 

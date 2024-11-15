@@ -4,7 +4,14 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
 
 export default function Edit({ attributes, setAttributes }) {
-    const { layout = 'grid', maxVideos = 5, selectedPlaylist = '', enableSearch = false, enablePlaylistFilter = false } = attributes;
+    const { 
+        layout = 'grid', 
+        maxVideos = 5, 
+        selectedPlaylist = '', 
+        enableSearch = false, 
+        enablePlaylistFilter = false 
+    } = attributes;
+
     const [playlists, setPlaylists] = useState([]);
 
     // Fetch playlists based on the channel ID provided
@@ -15,7 +22,9 @@ export default function Edit({ attributes, setAttributes }) {
                 return;
             }
             try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`);
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
+                );
                 const data = await response.json();
 
                 if (data.items) {
@@ -62,12 +71,12 @@ export default function Edit({ attributes, setAttributes }) {
                     <ToggleControl
                         label={__('Enable User Search', 'simple-youtube-feed')}
                         checked={enableSearch}
-                        onChange={(newSearchSetting) => setAttributes({ enableSearch: newSearchSetting })}
+                        onChange={(newSearchSetting) => setAttributes({ enableSearch: !!newSearchSetting })}
                     />
                     <ToggleControl
                         label={__('Enable Playlist Filter', 'simple-youtube-feed')}
                         checked={enablePlaylistFilter}
-                        onChange={(newPlaylistFilter) => setAttributes({ enablePlaylistFilter: newPlaylistFilter })}
+                        onChange={(newPlaylistFilter) => setAttributes({ enablePlaylistFilter: !!newPlaylistFilter })}
                     />
                 </PanelBody>
             </InspectorControls>
