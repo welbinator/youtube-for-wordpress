@@ -1,1 +1,252 @@
-(()=>{function e(e,t,n){const i=e.querySelector(".video-container");i&&i.remove();const a=document.createElement("div");if(a.classList.add("video-container"),"grid"===n)a.classList.add("youtube-feed-grid");else if("list"===n)a.classList.add("youtube-feed-list");else if("carousel"===n)return a.classList.add("swiper-container"),a.innerHTML=`\n            <div class="swiper-wrapper">\n                ${t.map((e=>`\n                    <div class="swiper-slide">\n                        <iframe\n                            src="https://www.youtube.com/embed/${e.id.videoId||e.snippet.resourceId?.videoId}?vq=hd720"\n                            title="${e.snippet.title}"\n                            class="video-iframe"\n                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"\n                            allowfullscreen\n                        ></iframe>\n                        <div class="video-info">\n                            <h2 class="video-title">${e.snippet.title}</h2>\n                            <p class="video-description">${e.snippet.description}</p>\n                        </div>\n                    </div>\n                `)).join("")}\n            </div>\n            <div class="swiper-pagination"></div>\n            <div class="swiper-button-next"></div>\n            <div class="swiper-button-prev"></div>\n        `,e.appendChild(a),void new Swiper(".swiper-container",{slidesPerView:1,spaceBetween:10,navigation:{nextEl:".swiper-button-next",prevEl:".swiper-button-prev"},pagination:{el:".swiper-pagination",clickable:!0},loop:!0,breakpoints:{640:{slidesPerView:1,spaceBetween:10},768:{slidesPerView:2,spaceBetween:20},1024:{slidesPerView:3,spaceBetween:30}}});e.appendChild(a),t.forEach((e=>{const t=document.createElement("div");t.classList.add("grid"===n?"youtube-video-grid-item":"youtube-video-list-item");const i=e.snippet.title,s=e.snippet.description,o=`https://www.youtube.com/embed/${e.id.videoId||e.snippet.resourceId?.videoId}?vq=hd720`;t.innerHTML=`\n            <div class="video-iframe-wrapper">\n                <iframe\n                    src="${o}"\n                    title="${i}"\n                    class="video-iframe"\n                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"\n                    allowfullscreen\n                ></iframe>\n            </div>\n            <div class="video-info">\n                <h2 class="video-title">${i}</h2>\n                <p class="video-description">${s}</p>\n            </div>\n        `,a.appendChild(t)}))}document.addEventListener("DOMContentLoaded",(async()=>{const t=document.getElementById("youtube-feed-container");if(!t)return void console.warn("YouTube feed container not found.");if(t.hasAttribute("data-initialized"))return;t.setAttribute("data-initialized","true");const n="true"===t.getAttribute("data-enable-search"),i="true"===t.getAttribute("data-enable-playlist-filter"),a=t.getAttribute("data-layout")||"grid",s=parseInt(t.getAttribute("data-max-videos"),10)||10,o=t.getAttribute("data-selected-playlist"),d="https://www.googleapis.com/youtube/v3",r={};let c=[],l=null;async function p(e="",t=""){const n=`${e}-${t}`;if(r[n])return r[n];let i=`${d}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${s}&key=${YT_FOR_WP.apiKey}`;t&&(i=`${d}/playlistItems?part=snippet&maxResults=${s}&playlistId=${t}&key=${YT_FOR_WP.apiKey}`),e&&(i+=`&q=${encodeURIComponent(e)}`);const a=await fetch(i),o=await a.json();return r[n]=o.items||[],r[n]}if(await async function e(t=!1){let n=`${d}/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&key=${YT_FOR_WP.apiKey}&maxResults=50`;l&&t&&(n+=`&pageToken=${l}`);try{const i=await fetch(n),a=await i.json();a.items&&(c=t?[...c,...a.items]:[{id:"",snippet:{title:"All Videos"}},...a.items]),l=a.nextPageToken||null,function(){const t=document.querySelector(".youtube-filter-container");if(!t)return void console.warn("Filter container not found for Load More button.");const n=document.querySelector(".load-more-button");if(n&&n.remove(),l&&t){const n=document.createElement("button");n.textContent="Load More",n.classList.add("load-more-button"),n.addEventListener("click",(()=>e(!0))),t.appendChild(n)}}()}catch(e){console.error("Error fetching playlists:",e)}}(),n||i){const s=document.createElement("div");if(s.classList.add("youtube-filter-container"),i){const n=document.createElement("select");n.classList.add("youtube-playlist-dropdown"),c.forEach((({id:e,snippet:t})=>{const i=document.createElement("option");i.value=e,i.textContent=t.title,e===o&&(i.selected=!0),n.appendChild(i)})),n.addEventListener("change",(async()=>{const i=n.value,s=document.querySelector(".youtube-search-bar")?.value.trim()||"",o=await p(s,i);e(t,o,a)})),s.appendChild(n)}if(n){const n=document.createElement("div");n.classList.add("youtube-search-container");const i=document.createElement("input");i.type="text",i.placeholder="Search videos",i.classList.add("youtube-search-bar");const o=document.createElement("button");o.textContent="Search",o.classList.add("youtube-search-button"),i.addEventListener("keypress",(e=>{"Enter"===e.key&&(e.preventDefault(),o.click())})),o.addEventListener("click",(async()=>{const n=i.value.trim(),s=document.querySelector(".youtube-playlist-dropdown")?.value||"",o=await p(n,s);e(t,o,a)})),n.appendChild(i),n.appendChild(o),s.appendChild(n)}t.appendChild(s)}const u=await p();e(t,u,a)}))})();
+/******/ (() => { // webpackBootstrap
+/*!*****************************************!*\
+  !*** ./src/simple-youtube-feed/view.js ***!
+  \*****************************************/
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("youtube-feed-container");
+
+  // Ensure container is available and not already initialized
+  if (!container) {
+    console.warn("YouTube feed container not found.");
+    return;
+  }
+  if (container.hasAttribute('data-initialized')) {
+    return;
+  }
+  container.setAttribute('data-initialized', 'true');
+  const enableSearch = container.getAttribute('data-enable-search') === 'true';
+  const enablePlaylistFilter = container.getAttribute('data-enable-playlist-filter') === 'true';
+  const layout = container.getAttribute('data-layout') || 'grid';
+  const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
+  const selectedPlaylist = container.getAttribute('data-selected-playlist');
+  const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
+
+  // Cache for avoiding repeated queries
+  const cache = {};
+  let playlists = [];
+  let nextPageToken = null;
+
+  // Function to fetch playlists
+  async function fetchPlaylists(loadMore = false) {
+    let apiUrl = `${apiUrlBase}/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&key=${YT_FOR_WP.apiKey}&maxResults=50`;
+    if (nextPageToken && loadMore) {
+      apiUrl += `&pageToken=${nextPageToken}`;
+    }
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      if (data.items) {
+        playlists = loadMore ? [...playlists, ...data.items] : [{
+          id: '',
+          snippet: {
+            title: 'All Videos'
+          }
+        }, ...data.items];
+      }
+      nextPageToken = data.nextPageToken || null;
+      renderLoadMoreButton();
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+    }
+  }
+
+  // Render the "Load More" button only if there are more playlists to load
+  function renderLoadMoreButton() {
+    const filterContainer = document.querySelector(".youtube-filter-container");
+    if (!filterContainer) {
+      console.warn("Filter container not found for Load More button.");
+      return;
+    }
+    const existingButton = document.querySelector(".load-more-button");
+    if (existingButton) existingButton.remove();
+    if (nextPageToken && filterContainer) {
+      const loadMoreButton = document.createElement("button");
+      loadMoreButton.textContent = "Load More";
+      loadMoreButton.classList.add("load-more-button");
+      loadMoreButton.addEventListener("click", () => fetchPlaylists(true));
+      filterContainer.appendChild(loadMoreButton);
+    }
+  }
+
+  // Call fetchPlaylists initially to load the first set of playlists
+  await fetchPlaylists();
+
+  // Function to fetch videos
+  async function fetchVideos(searchQuery = '', playlistId = '') {
+    const cacheKey = `${searchQuery}-${playlistId}`;
+    if (cache[cacheKey]) return cache[cacheKey];
+    let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
+    if (playlistId) {
+      apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
+    }
+    if (searchQuery) {
+      apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
+    }
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    cache[cacheKey] = data.items || [];
+    return cache[cacheKey];
+  }
+
+  // Create filter container if needed
+  if (enableSearch || enablePlaylistFilter) {
+    const filterContainer = document.createElement("div");
+    filterContainer.classList.add("youtube-filter-container");
+
+    // Render playlist dropdown
+    if (enablePlaylistFilter) {
+      const dropdown = document.createElement("select");
+      dropdown.classList.add("youtube-playlist-dropdown");
+      playlists.forEach(({
+        id,
+        snippet
+      }) => {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = snippet.title;
+        if (id === selectedPlaylist) {
+          option.selected = true; // Set default option if selected
+        }
+        dropdown.appendChild(option);
+      });
+      dropdown.addEventListener("change", async () => {
+        const playlistId = dropdown.value;
+        const searchQuery = document.querySelector(".youtube-search-bar")?.value.trim() || '';
+        const videos = await fetchVideos(searchQuery, playlistId);
+        renderVideos(container, videos, layout);
+      });
+      filterContainer.appendChild(dropdown);
+    }
+
+    // Render search bar
+    if (enableSearch) {
+      const searchContainer = document.createElement("div");
+      searchContainer.classList.add("youtube-search-container");
+      const searchBar = document.createElement("input");
+      searchBar.type = "text";
+      searchBar.placeholder = "Search videos";
+      searchBar.classList.add("youtube-search-bar");
+      const searchButton = document.createElement("button");
+      searchButton.textContent = "Search";
+      searchButton.classList.add("youtube-search-button");
+      searchBar.addEventListener("keypress", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          searchButton.click();
+        }
+      });
+      searchButton.addEventListener("click", async () => {
+        const keyword = searchBar.value.trim();
+        const playlistId = document.querySelector(".youtube-playlist-dropdown")?.value || '';
+        const videos = await fetchVideos(keyword, playlistId);
+        renderVideos(container, videos, layout);
+      });
+      searchContainer.appendChild(searchBar);
+      searchContainer.appendChild(searchButton);
+      filterContainer.appendChild(searchContainer);
+    }
+    container.appendChild(filterContainer);
+  }
+
+  // Initial video load
+  const initialVideos = await fetchVideos();
+  renderVideos(container, initialVideos, layout);
+});
+function renderVideos(container, videos, layout) {
+  const existingVideoContainer = container.querySelector(".video-container");
+  if (existingVideoContainer) {
+    existingVideoContainer.remove();
+  }
+  const videoContainer = document.createElement("div");
+  videoContainer.classList.add("video-container");
+  if (layout === "grid") {
+    videoContainer.classList.add("youtube-feed-grid");
+  } else if (layout === "list") {
+    videoContainer.classList.add("youtube-feed-list");
+  } else if (layout === "carousel") {
+    videoContainer.classList.add("swiper-container");
+    videoContainer.innerHTML = `
+            <div class="swiper-wrapper">
+                ${videos.map(video => `
+                    <div class="swiper-slide">
+                        <iframe
+                            src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
+                            title="${video.snippet.title}"
+                            class="video-iframe"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                        <div class="video-info">
+                            <h2 class="video-title">${video.snippet.title}</h2>
+                            <p class="video-description">${video.snippet.description}</p>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        `;
+    container.appendChild(videoContainer);
+
+    // Initialize Swiper.js for Carousel
+    new Swiper(".swiper-container", {
+      slidesPerView: 1,
+      spaceBetween: 10,
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev"
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true
+      },
+      loop: true,
+      breakpoints: {
+        640: {
+          slidesPerView: 1,
+          spaceBetween: 10
+        },
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 20
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 30
+        }
+      }
+    });
+    return; // Exit early since the carousel is fully rendered
+  }
+  container.appendChild(videoContainer);
+
+  // Populate videos for "Grid" and "List" layouts
+  videos.forEach(video => {
+    const videoElement = document.createElement("div");
+    videoElement.classList.add(layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item");
+    const title = video.snippet.title;
+    const description = video.snippet.description;
+    const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
+    videoElement.innerHTML = `
+            <div class="video-iframe-wrapper">
+                <iframe
+                    src="${videoUrl}"
+                    title="${title}"
+                    class="video-iframe"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+            </div>
+            <div class="video-info">
+                <h2 class="video-title">${title}</h2>
+                <p class="video-description">${description}</p>
+            </div>
+        `;
+    videoContainer.appendChild(videoElement);
+  });
+}
+/******/ })()
+;
+//# sourceMappingURL=view.js.map
