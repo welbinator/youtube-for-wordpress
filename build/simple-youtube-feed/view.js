@@ -20,28 +20,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   const selectedPlaylist = container.getAttribute('data-selected-playlist');
   const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
 
-  // Function to perform API fetch, with caching by query term
-  const cache = {};
+  // Async function to fetch videos, with persistent caching using WordPress transients
   async function fetchVideos(searchQuery = '') {
-    // Use cache to avoid duplicate queries for the same search term
-    if (cache[searchQuery]) {
-      return cache[searchQuery];
-    }
-    let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
-    if (selectedPlaylist) {
-      apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${selectedPlaylist}&key=${YT_FOR_WP.apiKey}`;
-    }
+    try {
+      // Create a unique cache key based on search query, playlist, and max videos
+      const cacheKey = `youtube_videos_${searchQuery}_${selectedPlaylist}_${maxVideos}`;
 
-    // Add search query parameter if provided
-    if (searchQuery) {
-      apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
-    }
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+      // Check if cached videos exist
+      let cachedVideos = await fetch(`/wp-json/yt-for-wp/v1/get_cached_videos?key=${encodeURIComponent(cacheKey)}`).then(res => res.json());
+      if (cachedVideos && cachedVideos.length > 0) {
+        return cachedVideos;
+      }
 
-    // Store the response in cache
-    cache[searchQuery] = data.items || [];
-    return cache[searchQuery];
+      // Construct API URL if no cached data found
+      let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
+      if (selectedPlaylist) {
+        apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${selectedPlaylist}&key=${YT_FOR_WP.apiKey}`;
+      }
+      if (searchQuery) {
+        apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
+      }
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      // Cache the response using a custom REST endpoint
+      await fetch('/wp-json/yt-for-wp/v1/cache_videos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          key: cacheKey,
+          videos: data.items || []
+        })
+      });
+      return data.items || [];
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      return [];
+    }
   }
 
   // Render the search bar if enabled
@@ -109,6 +126,58 @@ function renderVideos(container, videos, layout) {
             </div>
         `;
     videoContainer.appendChild(videoElement);
+  });
+}
+function renderCarouselLayout(container, videos) {
+  container.innerHTML = `
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                ${videos.map(video => `
+                    <div class="swiper-slide">
+                        <iframe
+                            src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
+                            title="${video.snippet.title}"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                        <div class="video-info">
+                            <h2 class="video-title">${video.snippet.title}</h2>
+                            <p class="video-description">${video.snippet.description}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    `;
+  new Swiper('.swiper-container', {
+    slidesPerView: 1,
+    spaceBetween: 10,
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev'
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true
+    },
+    loop: true,
+    breakpoints: {
+      640: {
+        slidesPerView: 1,
+        spaceBetween: 10
+      },
+      768: {
+        slidesPerView: 2,
+        spaceBetween: 20
+      },
+      1024: {
+        slidesPerView: 3,
+        spaceBetween: 30
+      }
+    }
   });
 }
 /******/ })()
