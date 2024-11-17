@@ -24,6 +24,7 @@ namespace YouTubeForWP;
  // Include admin settings file.
  require_once YT_FOR_WP_PATH . 'includes/admin-settings.php';
  require_once YT_FOR_WP_PATH . 'blocks/simple-youtube-feed/simple-youtube-feed.php';
+ require_once YT_FOR_WP_PATH . 'blocks/youtube-live/youtube-live.php';
 
  // Register settings page.
  function add_admin_menu() {
@@ -56,53 +57,77 @@ namespace YouTubeForWP;
         true
     );
     
-    if (is_singular() && has_block('yt-for-wp/simple-youtube-feed')) {
-            wp_enqueue_script(
-            'yt-for-wp-view',
-            plugins_url('build/simple-youtube-feed/view.js', __FILE__),
-            [],
-            null,
-            true
-        );
-    }
-
-    // Corrected option keys
     $channel_id = get_option('yt_for_wp_channel_id');
     $api_key = get_option('yt_for_wp_api_key');
 
+    if (is_singular() && has_block('yt-for-wp/simple-youtube-feed')) {
+        wp_enqueue_script(
+            'yt-for-wp-simple-youtube-feed-view', // Unique handle for the simple feed view script
+            plugins_url('build/simple-youtube-feed/view.js', __FILE__),
+            [],
+            YOUTUBE_FOR_WP_VERSION,
+            true
+        );
 
-    if ($channel_id && $api_key) {
-        wp_localize_script('yt-for-wp-view', 'YT_FOR_WP', [
+        // Localize for the simple YouTube feed
+        wp_localize_script('yt-for-wp-simple-youtube-feed-view', 'YT_FOR_WP', [
             'channelId' => $channel_id,
             'apiKey'    => $api_key,
         ]);
-    } else {
-        error_log('Channel ID or API key is missing. Ensure they are set in the plugin settings.');
+    }
+    
+    if (is_singular() && has_block('yt-for-wp/youtube-live')) {
+        wp_enqueue_script(
+            'yt-for-wp-youtube-live-view', // Unique handle for the YouTube Live view script
+            plugins_url('build/youtube-live/view.js', __FILE__),
+            [],
+            YOUTUBE_FOR_WP_VERSION,
+            true
+        );
+
+        // Localize for the YouTube Live block
+        wp_localize_script('yt-for-wp-youtube-live-view', 'YT_FOR_WP', [
+            'channelId' => $channel_id,
+            'apiKey'    => $api_key,
+        ]);
     }
 }
 add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\yt_for_wp_enqueue_scripts');
 
+
 function yt_for_wp_enqueue_block_editor_assets() {
    
     wp_enqueue_script(
-        'yt-for-wp-editor', // Handle for the editor script
-        plugins_url('build/simple-youtube-feed/index.js', __FILE__), // Path to the compiled script
-        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'], // Dependencies
+        'yt-for-wp-simple-youtube-feed-editor', // Unique handle for the Simple YouTube Feed block editor script
+        plugins_url('build/simple-youtube-feed/index.js', __FILE__),
+        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'],
         YOUTUBE_FOR_WP_VERSION,
         true
     );
     
+    wp_enqueue_script(
+        'yt-for-wp-youtube-live-editor', // Unique handle for the YouTube Live block editor script
+        plugins_url('build/youtube-live/index.js', __FILE__),
+        ['wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'],
+        YOUTUBE_FOR_WP_VERSION,
+        true
+    );
+    
+    
     // Mark it as a module
-    wp_script_add_data( 'yt-for-wp-editor', 'type', 'module' );
+    wp_script_add_data('yt-for-wp-simple-youtube-feed-editor', 'type', 'module');
+    wp_script_add_data('yt-for-wp-youtube-live-editor', 'type', 'module');
+
 
     
     $channel_id = get_option('yt_for_wp_channel_id');
     $api_key = get_option('yt_for_wp_api_key');
 
-    wp_localize_script('yt-for-wp-editor', 'YT_FOR_WP', [
+    wp_localize_script('yt-for-wp-youtube-live-editor', 'YT_FOR_WP', [
         'channelId' => $channel_id,
         'apiKey'    => $api_key,
     ]);
+    
 }
 add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_block_editor_assets');
 
@@ -110,13 +135,16 @@ add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_b
 add_action('rest_api_init', function() {
     register_rest_route('yt-for-wp/v1', '/get_cached_videos', [
         'methods' => 'GET',
-        'callback' => 'get_cached_videos'
+        'callback' => 'get_cached_videos',
+        'permission_callback' => '__return_true', // Add this line
     ]);
     register_rest_route('yt-for-wp/v1', '/cache_videos', [
         'methods' => 'POST',
-        'callback' => 'cache_videos'
+        'callback' => 'cache_videos',
+        'permission_callback' => '__return_true', // Add this line
     ]);
 });
+
 
 function get_cached_videos(WP_REST_Request $request) {
     $key = sanitize_text_field($request->get_param('key'));
