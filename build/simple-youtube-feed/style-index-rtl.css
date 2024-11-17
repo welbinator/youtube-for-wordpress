@@ -269,3 +269,7 @@
 .swiper-button-next:after, .swiper-button-prev:after {
   font-weight: bolder;
 }
+
+.swiper-button-next, .swiper-button-prev {
+  top: var(--swiper-navigation-top-offset, 32%) !important;
+}
