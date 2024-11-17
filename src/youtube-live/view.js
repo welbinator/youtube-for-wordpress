@@ -33,18 +33,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         // First, fetch currently live videos
-        let videos = await fetchVideos('live');
+        let liveVideos = await fetchVideos('live');
 
-        if (videos.length === 0) {
-            // If no live videos are available, fetch completed live videos
-            videos = await fetchVideos('completed');
+        if (liveVideos.length > 0) {
+            renderVideos(container, liveVideos, true); // Autoplay live videos
+            return;
         }
 
-        if (videos.length > 0) {
-            renderVideos(container, videos);
-        } else {
-            container.innerHTML = '<p>No live or previous live videos available.</p>';
+        // If no live videos are available, fetch completed live videos
+        let previousLiveVideos = await fetchVideos('completed');
+
+        if (previousLiveVideos.length > 0) {
+            renderVideos(container, previousLiveVideos, false); // No autoplay for previous lives
+            return;
         }
+
+        container.innerHTML = '<p>No live or previous live videos available.</p>';
     } catch (error) {
         console.error("Error fetching videos:", error);
         container.innerHTML = '<p>Error loading videos. Check console for details.</p>';
@@ -52,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Render the videos
-function renderVideos(container, videos) {
+function renderVideos(container, videos, autoplay) {
     container.innerHTML = videos
         .map((video) => {
             const videoId = video.id.videoId;
@@ -61,7 +65,7 @@ function renderVideos(container, videos) {
             return `
                 <div class="youtube-live-wrapper">
                     <iframe
-                        src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                        src="https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}"
                         title="${videoTitle}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
