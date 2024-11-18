@@ -18,9 +18,9 @@ export default function Edit({ attributes, setAttributes }) {
     // Fetch playlists based on the channel ID provided
     useEffect(() => {
         async function fetchPlaylists() {
-            const currentChannelId = channelId || YT_FOR_WP.channelId; // Use block or default channel ID
+            const currentChannelId = channelId || YT_FOR_WP.channelId;
             if (!currentChannelId || !YT_FOR_WP.apiKey) {
-                console.warn('Channel ID or API Key is missing.');
+                setPlaylists([{ label: __('Please configure YouTube API settings', 'yt-for-wp'), value: '' }]);
                 return;
             }
             try {
@@ -28,23 +28,30 @@ export default function Edit({ attributes, setAttributes }) {
                     `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${currentChannelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
                 );
                 const data = await response.json();
-
+    
+                if (data.error) {
+                    console.error('YouTube API Error:', data.error.message);
+                    setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
+                    return;
+                }
+    
                 if (data.items) {
                     setPlaylists([
-                        { label: __('All Videos', 'simple-youtube-feed'), value: '' }, // Default option
+                        { label: __('All Videos', 'simple-youtube-feed'), value: '' },
                         ...data.items.map((playlist) => ({
                             label: playlist.snippet.title,
                             value: playlist.id,
                         })),
                     ]);
                 } else {
-                    console.warn('No playlists found or API quota exceeded.');
+                    setPlaylists([{ label: __('No playlists found', 'yt-for-wp'), value: '' }]);
                 }
             } catch (error) {
                 console.error('Error fetching playlists:', error);
+                setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
             }
         }
-
+    
         fetchPlaylists();
     }, [channelId]);
 

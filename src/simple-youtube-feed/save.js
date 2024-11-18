@@ -11,7 +11,7 @@ export default function save({ attributes }) {
             data-selected-playlist={selectedPlaylist}
             data-enable-search={enableSearch ? 'true' : 'false'}
             data-enable-playlist-filter={enablePlaylistFilter ? 'true' : 'false'}
-            data-channel-id={channelId || YT_FOR_WP.channelId} // Default to settings if blank
+            data-channel-id={channelId} // Remove the YT_FOR_WP reference
             id="youtube-feed-container"
         ></div>
     );
