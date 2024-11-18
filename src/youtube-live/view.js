@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    const channelId = container.getAttribute('data-channel-id');
     const maxVideos = container.getAttribute('data-max-videos') || 1;
+    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId; // Check for custom channel ID
 
     if (!channelId) {
         console.error("Channel ID is missing.");
@@ -16,14 +16,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const apiKey = YT_FOR_WP.apiKey;
 
-    // Helper function to fetch live or completed live videos
     async function fetchVideos(eventType) {
         const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=${eventType}&maxResults=${maxVideos}&key=${apiKey}`;
-        console.log("Fetching videos with URL:", apiUrl); // Debugging
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
-            console.log("API response for", eventType, ":", data); // Debugging
             return data.items || [];
         } catch (error) {
             console.error("Error fetching videos:", error);
@@ -32,19 +29,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        // First, fetch currently live videos
         let liveVideos = await fetchVideos('live');
 
         if (liveVideos.length > 0) {
-            renderVideos(container, liveVideos, true); // Autoplay live videos
+            renderVideos(container, liveVideos, true);
             return;
         }
 
-        // If no live videos are available, fetch completed live videos
         let previousLiveVideos = await fetchVideos('completed');
 
         if (previousLiveVideos.length > 0) {
-            renderVideos(container, previousLiveVideos, false); // No autoplay for previous lives
+            renderVideos(container, previousLiveVideos, false);
             return;
         }
 
@@ -55,7 +50,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-// Render the videos
 function renderVideos(container, videos, autoplay) {
     container.innerHTML = videos
         .map((video) => {

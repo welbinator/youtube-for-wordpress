@@ -11,10 +11,6 @@
         "html": false
     },
     "attributes": {
-        "channelId": {
-            "type": "string",
-            "default": ""
-        },
         "maxVideos": {
             "type": "number",
             "default": 1
