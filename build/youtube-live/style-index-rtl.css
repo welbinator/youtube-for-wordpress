@@ -1,1 +1,22 @@
-#youtube-live-container{margin:0 auto;max-width:1200px;padding:1rem}.youtube-live-wrapper{align-items:center;display:flex;flex-direction:column;gap:1rem}.youtube-live-wrapper iframe{border:0;height:450px;max-width:800px;width:100%}
+/*!****************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/youtube-live/style.scss ***!
+  \****************************************************************************************************************************************************************************************************************************************************/
+#youtube-live-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.youtube-live-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.youtube-live-wrapper iframe {
+  width: 100%;
+  max-width: 800px;
+  height: 450px;
+  border: 0;
+}

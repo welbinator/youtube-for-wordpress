@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     container.setAttribute('data-initialized', 'true');
 
-    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId; // Use block or default channel ID
+    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
     const enableSearch = container.getAttribute('data-enable-search') === 'true';
     const enablePlaylistFilter = container.getAttribute('data-enable-playlist-filter') === 'true';
     const layout = container.getAttribute('data-layout') || 'grid';
@@ -21,6 +21,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const selectedPlaylist = container.getAttribute('data-selected-playlist');
     const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
     const apiKey = YT_FOR_WP.apiKey;
+
+    // Define fetch options with headers
+    const fetchOptions = {
+        headers: {
+            'Referer': YT_FOR_WP.siteUrl,
+            'Origin': YT_FOR_WP.siteUrl
+        }
+    };
 
     // Cache for avoiding repeated queries
     const cache = {};
@@ -36,8 +44,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            const response = await fetch(apiUrl);
+            const response = await fetch(apiUrl, fetchOptions);
             const data = await response.json();
+
+            if (data.error) {
+                console.error('YouTube API Error:', data.error);
+                return;
+            }
 
             if (data.items) {
                 playlists = loadMore
@@ -87,8 +100,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            const response = await fetch(apiUrl);
+            const response = await fetch(apiUrl, fetchOptions);
             const data = await response.json();
+            
+            if (data.error) {
+                console.error('YouTube API Error:', data.error);
+                return [];
+            }
+            
             cache[cacheKey] = data.items || [];
             return cache[cacheKey];
         } catch (error) {
