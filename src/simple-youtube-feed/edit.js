@@ -9,15 +9,14 @@ export default function Edit({ attributes, setAttributes }) {
         layout = 'grid',
         maxVideos = 5,
         selectedPlaylist = '',
-        channelId
     } = attributes;
 
     const [playlists, setPlaylists] = useState([]);
 
-    // Fetch playlists based on the channel ID provided
+    // Fetch playlists (using global YT_FOR_WP channelId)
     useEffect(() => {
         async function fetchPlaylists() {
-            const currentChannelId = channelId || YT_FOR_WP.channelId;
+            const currentChannelId = YT_FOR_WP.channelId;
             if (!currentChannelId || !YT_FOR_WP.apiKey) {
                 setPlaylists([{ label: __('Please configure YouTube API settings', 'yt-for-wp'), value: '' }]);
                 return;
@@ -52,18 +51,12 @@ export default function Edit({ attributes, setAttributes }) {
         }
 
         fetchPlaylists();
-    }, [channelId]);
+    }, []);
 
     return (
         <>
             <InspectorControls>
                 <PanelBody title={__('Layout Settings', 'simple-youtube-feed')}>
-                    <TextControl
-                        label={__('YouTube Channel ID', 'yt-for-wp')}
-                        value={channelId || YT_FOR_WP.channelId}
-                        onChange={(newChannelId) => setAttributes({ channelId: newChannelId })}
-                        help={__('Leave blank to use the default Channel ID from settings.', 'yt-for-wp')}
-                    />
                     <SelectControl
                         label={__('Select Layout', 'simple-youtube-feed')}
                         value={layout}
@@ -89,8 +82,6 @@ export default function Edit({ attributes, setAttributes }) {
 
             <p {...useBlockProps()}>
                 {__('Simple YouTube Feed', 'simple-youtube-feed')}
-                <br />
-                {__('Channel ID:', 'simple-youtube-feed')} {channelId || YT_FOR_WP.channelId}
             </p>
         </>
     );

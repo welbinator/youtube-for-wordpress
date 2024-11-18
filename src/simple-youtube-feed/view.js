@@ -23,11 +23,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cache = {};
 
     // Function to fetch videos
-    async function fetchVideos() {
-        const cacheKey = `${channelId}-${layout}-${maxVideos}`;
+    async function fetchVideos(searchQuery = '', playlistId = '') {
+        const cacheKey = `${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
         if (cache[cacheKey]) return cache[cacheKey];
 
-        const apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${apiKey}`;
+        let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${apiKey}`;
+        if (playlistId) {
+            apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${apiKey}`;
+        }
+        if (searchQuery) {
+            apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
+        }
 
         try {
             const response = await fetch(apiUrl);
@@ -146,6 +152,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             videoContainer.appendChild(videoElement);
         });
     }
+
+    // Expose functions globally for Pro use
+    YT_FOR_WP.fetchVideos = fetchVideos;
+    YT_FOR_WP.renderVideos = renderVideos;
 
     // Fetch and render videos
     const videos = await fetchVideos();
