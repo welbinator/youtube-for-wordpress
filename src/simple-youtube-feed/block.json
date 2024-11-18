@@ -23,14 +23,6 @@
             "type": "string",
             "default": ""
         },
-        "enableSearch": {
-            "type": "boolean",
-            "default": false
-        },
-        "enablePlaylistFilter": {
-            "type": "boolean",
-            "default": false
-        },
         "channelId": {
             "type": "string",
             "default": ""

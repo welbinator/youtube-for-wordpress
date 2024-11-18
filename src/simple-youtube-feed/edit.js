@@ -1,15 +1,14 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
+import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
+import { doAction } from '@wordpress/hooks';
 
 export default function Edit({ attributes, setAttributes }) {
     const {
         layout = 'grid',
         maxVideos = 5,
         selectedPlaylist = '',
-        enableSearch = false,
-        enablePlaylistFilter = false,
         channelId
     } = attributes;
 
@@ -28,13 +27,13 @@ export default function Edit({ attributes, setAttributes }) {
                     `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${currentChannelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
                 );
                 const data = await response.json();
-    
+
                 if (data.error) {
                     console.error('YouTube API Error:', data.error.message);
                     setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
                     return;
                 }
-    
+
                 if (data.items) {
                     setPlaylists([
                         { label: __('All Videos', 'simple-youtube-feed'), value: '' },
@@ -51,7 +50,7 @@ export default function Edit({ attributes, setAttributes }) {
                 setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
             }
         }
-    
+
         fetchPlaylists();
     }, [channelId]);
 
@@ -61,7 +60,7 @@ export default function Edit({ attributes, setAttributes }) {
                 <PanelBody title={__('Layout Settings', 'simple-youtube-feed')}>
                     <TextControl
                         label={__('YouTube Channel ID', 'yt-for-wp')}
-                        value={channelId || YT_FOR_WP.channelId} // Default to settings if blank
+                        value={channelId || YT_FOR_WP.channelId}
                         onChange={(newChannelId) => setAttributes({ channelId: newChannelId })}
                         help={__('Leave blank to use the default Channel ID from settings.', 'yt-for-wp')}
                     />
@@ -83,18 +82,10 @@ export default function Edit({ attributes, setAttributes }) {
                         value={maxVideos}
                         onChange={(newMax) => setAttributes({ maxVideos: parseInt(newMax, 10) || 1 })}
                     />
-                    <ToggleControl
-                        label={__('Enable User Search', 'simple-youtube-feed')}
-                        checked={enableSearch}
-                        onChange={(newSearchSetting) => setAttributes({ enableSearch: !!newSearchSetting })}
-                    />
-                    <ToggleControl
-                        label={__('Enable Playlist Filter', 'simple-youtube-feed')}
-                        checked={enablePlaylistFilter}
-                        onChange={(newPlaylistFilter) => setAttributes({ enablePlaylistFilter: !!newPlaylistFilter })}
-                    />
                 </PanelBody>
             </InspectorControls>
+
+            {doAction('yt_for_wp_simple_feed_editor_controls', attributes, setAttributes)}
 
             <p {...useBlockProps()}>
                 {__('Simple YouTube Feed', 'simple-youtube-feed')}
