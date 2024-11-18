@@ -29,6 +29,9 @@ class API_Key_Handler {
         $key = get_option(self::ENCRYPTION_KEY_OPTION);
         
         if (!$key) {
+            if (!current_user_can('manage_options')) {
+                return false;
+            }
             $key = $this->generate_encryption_key();
             if ($key === false) {
                 return false;
@@ -115,6 +118,10 @@ class API_Key_Handler {
      * Save the API key
      */
     public function save_api_key($api_key) {
+        if (!current_user_can('manage_options')) {
+            return false;
+        }
+
         if (empty($api_key)) {
             delete_option(self::ENCRYPTED_API_KEY_OPTION);
             return true;
@@ -155,6 +162,10 @@ function get_api_key() {
  * Register settings and add validation.
  */
 function register_settings() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
     // First, register the settings section
     add_settings_section(
         'yt_for_wp_main_section',
@@ -168,6 +179,9 @@ function register_settings() {
         'yt_for_wp_api_key',
         __('YouTube API Key', 'yt-for-wp'),
         function() {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
             $api_key = get_api_key();
             ?>
             <input 
@@ -190,6 +204,9 @@ function register_settings() {
         'yt_for_wp_channel_id',
         __('YouTube Channel ID', 'yt-for-wp'),
         function() {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
             $channel_id = get_option('yt_for_wp_channel_id', '');
             ?>
             <input 
@@ -210,6 +227,16 @@ function register_settings() {
         'yt_for_wp_api_key',
         [
             'sanitize_callback' => function($input) {
+                if (!current_user_can('manage_options')) {
+                    add_settings_error(
+                        'yt_for_wp_api_key',
+                        'invalid_permissions',
+                        __('You do not have permission to modify these settings.', 'yt-for-wp'),
+                        'error'
+                    );
+                    return get_api_key(); // Return existing value
+                }
+
                 if (empty($input)) {
                     delete_option('yt_for_wp_encrypted_api_key');
                     return '';
@@ -237,7 +264,12 @@ function register_settings() {
         'yt_for_wp_settings',
         'yt_for_wp_channel_id',
         [
-            'sanitize_callback' => __NAMESPACE__ . '\\sanitize_channel_id',
+            'sanitize_callback' => function($input) {
+                if (!current_user_can('manage_options')) {
+                    return get_option('yt_for_wp_channel_id'); // Return existing value
+                }
+                return sanitize_text_field($input);
+            },
             'show_in_rest' => false,
         ]
     );
@@ -285,9 +317,6 @@ function render_settings_page() {
 
 /**
  * Validate the API key by making a test request
- *
- * @param string $api_key The API key to validate
- * @return string Status message
  */
 function validate_api_key($api_key) {
     if (empty($api_key)) {
