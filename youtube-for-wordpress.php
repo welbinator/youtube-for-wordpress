@@ -31,6 +31,11 @@ define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
 define('YT_FOR_WP_MIN_PHP_VERSION', '7.4');
 
+// Define a constant to indicate the free version is active.
+if (!defined('YOUTUBE_FOR_WP_ACTIVE')) {
+    define('YOUTUBE_FOR_WP_ACTIVE', true);
+}
+
 /**
  * Check PHP and WordPress versions before activation
  */
