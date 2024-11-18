@@ -30,6 +30,10 @@
     "enablePlaylistFilter": {
       "type": "boolean",
       "default": false
+    },
+    "channelId": {
+      "type": "string",
+      "default": ""
     }
   },
   "textdomain": "yt-for-wp",
