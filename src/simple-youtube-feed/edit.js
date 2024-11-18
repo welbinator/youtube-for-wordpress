@@ -4,12 +4,13 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl, ToggleControl } from '@wordpress/components';
 
 export default function Edit({ attributes, setAttributes }) {
-    const { 
-        layout = 'grid', 
-        maxVideos = 5, 
-        selectedPlaylist = '', 
-        enableSearch = false, 
-        enablePlaylistFilter = false 
+    const {
+        layout = 'grid',
+        maxVideos = 5,
+        selectedPlaylist = '',
+        enableSearch = false,
+        enablePlaylistFilter = false,
+        channelId
     } = attributes;
 
     const [playlists, setPlaylists] = useState([]);
@@ -17,20 +18,21 @@ export default function Edit({ attributes, setAttributes }) {
     // Fetch playlists based on the channel ID provided
     useEffect(() => {
         async function fetchPlaylists() {
-            if (!YT_FOR_WP.channelId || !YT_FOR_WP.apiKey) {
+            const currentChannelId = channelId || YT_FOR_WP.channelId; // Use block or default channel ID
+            if (!currentChannelId || !YT_FOR_WP.apiKey) {
                 console.warn('Channel ID or API Key is missing.');
                 return;
             }
             try {
                 const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
+                    `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${currentChannelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
                 );
                 const data = await response.json();
 
                 if (data.items) {
                     setPlaylists([
                         { label: __('All Videos', 'simple-youtube-feed'), value: '' }, // Default option
-                        ...data.items.map(playlist => ({
+                        ...data.items.map((playlist) => ({
                             label: playlist.snippet.title,
                             value: playlist.id,
                         })),
@@ -44,12 +46,18 @@ export default function Edit({ attributes, setAttributes }) {
         }
 
         fetchPlaylists();
-    }, []);
+    }, [channelId]);
 
     return (
         <>
             <InspectorControls>
                 <PanelBody title={__('Layout Settings', 'simple-youtube-feed')}>
+                    <TextControl
+                        label={__('YouTube Channel ID', 'yt-for-wp')}
+                        value={channelId || YT_FOR_WP.channelId} // Default to settings if blank
+                        onChange={(newChannelId) => setAttributes({ channelId: newChannelId })}
+                        help={__('Leave blank to use the default Channel ID from settings.', 'yt-for-wp')}
+                    />
                     <SelectControl
                         label={__('Select Layout', 'simple-youtube-feed')}
                         value={layout}
@@ -83,6 +91,8 @@ export default function Edit({ attributes, setAttributes }) {
 
             <p {...useBlockProps()}>
                 {__('Simple YouTube Feed', 'simple-youtube-feed')}
+                <br />
+                {__('Channel ID:', 'simple-youtube-feed')} {channelId || YT_FOR_WP.channelId}
             </p>
         </>
     );

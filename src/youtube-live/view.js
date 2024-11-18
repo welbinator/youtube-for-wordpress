@@ -65,7 +65,7 @@ function renderVideos(container, videos, autoplay) {
             return `
                 <div class="youtube-live-wrapper">
                     <iframe
-                        src="https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}"
+                        src="https://www.youtube.com/embed/${videoId}?autoplay=0"
                         title="${videoTitle}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

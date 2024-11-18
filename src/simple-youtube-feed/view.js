@@ -13,12 +13,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     container.setAttribute('data-initialized', 'true');
 
+    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId; // Use block or default channel ID
     const enableSearch = container.getAttribute('data-enable-search') === 'true';
     const enablePlaylistFilter = container.getAttribute('data-enable-playlist-filter') === 'true';
     const layout = container.getAttribute('data-layout') || 'grid';
     const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
     const selectedPlaylist = container.getAttribute('data-selected-playlist');
     const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
+    const apiKey = YT_FOR_WP.apiKey;
 
     // Cache for avoiding repeated queries
     const cache = {};
@@ -28,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Function to fetch playlists
     async function fetchPlaylists(loadMore = false) {
-        let apiUrl = `${apiUrlBase}/playlists?part=snippet&channelId=${YT_FOR_WP.channelId}&key=${YT_FOR_WP.apiKey}&maxResults=50`;
+        let apiUrl = `${apiUrlBase}/playlists?part=snippet&channelId=${channelId}&key=${apiKey}&maxResults=50`;
         if (nextPageToken && loadMore) {
             apiUrl += `&pageToken=${nextPageToken}`;
         }
@@ -36,9 +38,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
-            
+
             if (data.items) {
-                playlists = loadMore ? [...playlists, ...data.items] : [{ id: '', snippet: { title: 'All Videos' } }, ...data.items];
+                playlists = loadMore
+                    ? [...playlists, ...data.items]
+                    : [{ id: '', snippet: { title: 'All Videos' } }, ...data.items];
             }
             nextPageToken = data.nextPageToken || null;
             renderLoadMoreButton();
@@ -55,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
         const existingButton = document.querySelector(".load-more-button");
-        
+
         if (existingButton) existingButton.remove();
         if (nextPageToken && filterContainer) {
             const loadMoreButton = document.createElement("button");
@@ -74,18 +78,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         const cacheKey = `${searchQuery}-${playlistId}`;
         if (cache[cacheKey]) return cache[cacheKey];
 
-        let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${YT_FOR_WP.channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
+        let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${apiKey}`;
         if (playlistId) {
-            apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
+            apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${apiKey}`;
         }
         if (searchQuery) {
             apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
         }
 
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        cache[cacheKey] = data.items || [];
-        return cache[cacheKey];
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            cache[cacheKey] = data.items || [];
+            return cache[cacheKey];
+        } catch (error) {
+            console.error('Error fetching videos:', error);
+            return [];
+        }
     }
 
     // Create filter container if needed
@@ -159,6 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderVideos(container, initialVideos, layout);
 });
 
+// Render videos
 function renderVideos(container, videos, layout) {
     const existingVideoContainer = container.querySelector(".video-container");
     if (existingVideoContainer) {
@@ -176,7 +186,9 @@ function renderVideos(container, videos, layout) {
         videoContainer.classList.add("swiper-container");
         videoContainer.innerHTML = `
             <div class="swiper-wrapper">
-                ${videos.map((video) => `
+                ${videos
+                    .map(
+                        (video) => `
                     <div class="swiper-slide">
                         <iframe
                             src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
@@ -190,7 +202,9 @@ function renderVideos(container, videos, layout) {
                             <p class="video-description">${video.snippet.description}</p>
                         </div>
                     </div>
-                `).join("")}
+                `
+                    )
+                    .join('')}
             </div>
             <div class="swiper-pagination"></div>
             <div class="swiper-button-next"></div>
@@ -254,4 +268,3 @@ function renderVideos(container, videos, layout) {
         videoContainer.appendChild(videoElement);
     });
 }
-
