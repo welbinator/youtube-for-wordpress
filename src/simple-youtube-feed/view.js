@@ -1,5 +1,9 @@
+import Swiper from 'swiper';
+import 'swiper/css';
+
 document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.getElementById("youtube-feed-container");
+    const container = document.querySelector("[id^='youtube-feed-']");
+
 
     // Ensure container is available and not already initialized
     if (!container) {
@@ -24,7 +28,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Function to fetch videos
     async function fetchVideos(searchQuery = '', playlistId = '') {
-        const cacheKey = `${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
+        const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
+
         if (cache[cacheKey]) return cache[cacheKey];
 
         let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${apiKey}`;
@@ -97,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             container.appendChild(videoContainer);
 
             // Initialize Swiper.js for Carousel
-            new Swiper(".swiper-container", {
+            new Swiper(`#${uniqueId} .swiper-container`, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
