@@ -12,17 +12,29 @@
     },
     "attributes": {
         "layout": {
-            "type": "string",
-            "default": "grid"
-        },
-        "maxVideos": {
-            "type": "number",
-            "default": 5
-        },
-        "selectedPlaylist": {
-            "type": "string",
-            "default": ""
-        }
+        "type": "string",
+        "default": "grid"
+    },
+    "maxVideos": {
+        "type": "number",
+        "default": 5
+    },
+    "selectedPlaylist": {
+        "type": "string",
+        "default": ""
+    },
+    "channelId": {
+        "type": "string",
+        "default": ""
+    },
+    "enableSearch": {
+        "type": "boolean",
+        "default": false
+    },
+    "enablePlaylistFilter": {
+        "type": "boolean",
+        "default": false
+    }
     },
     "textdomain": "yt-for-wp",
     "editorScript": "file:./index.js",
