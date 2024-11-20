@@ -4,7 +4,7 @@ import 'swiper/css';
 document.addEventListener("DOMContentLoaded", () => {
     // Select all YouTube feed containers
     const containers = document.querySelectorAll("[id^='youtube-feed-']");
-    console.log('Found containers:', containers);
+    
 
     if (!containers.length) {
         console.warn("YouTube feed containers not found.");
@@ -59,26 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Invalid container element.');
             return;
         }
-
+    
+        if (container.hasAttribute('data-swiper-initialized')) {
+            console.warn(`Skipping container: Already initialized for #${container.id}`);
+            return;
+        }
+    
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
             existingVideoContainer.remove();
         }
-
+    
         const videoContainer = document.createElement("div");
         videoContainer.classList.add("video-container");
-
-        if (layout === "grid") {
-            videoContainer.classList.add("youtube-feed-grid");
-        } else if (layout === "list") {
-            videoContainer.classList.add("youtube-feed-list");
-        } else if (layout === "carousel") {
-            if (container.hasAttribute('data-swiper-initialized')) {
-                console.warn(`Swiper already initialized for container: #${container.id}`);
-                return;
-            }
-
-            console.log(`Initializing Swiper for container: #${container.id}`);
+    
+        if (layout === "carousel") {
             videoContainer.classList.add("swiper-container");
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
@@ -106,18 +101,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
-
+    
             container.appendChild(videoContainer);
+    
+            console.log(`Initializing Swiper for container: #${container.id}`);
 
+            const nextButton = container.querySelector('.swiper-button-next');
+            const prevButton = container.querySelector('.swiper-button-prev');
+    
+            if (!nextButton || !prevButton) {
+                console.error('Navigation buttons are missing for Swiper:', {
+                    nextButton,
+                    prevButton,
+                });
+                return;
+            }
+    
+            console.log(`Next Button Selector:`, nextButton);
+            console.log(`Prev Button Selector:`, prevButton);
+    
+            // Initialize Swiper
+            console.log(`Initializing Swiper for container: #${container.id}`);
             const swiperInstance = new Swiper(`#${container.id} .swiper-container`, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
-                    nextEl: `#${container.id} .swiper-button-next`,
-                    prevEl: `#${container.id} .swiper-button-prev`,
+                    nextEl: container.querySelector('.swiper-button-next'),
+                    prevEl: container.querySelector('.swiper-button-prev'),
                 },
+                
                 pagination: {
-                    el: `#${container.id} .swiper-pagination`,
+                    el: container.querySelector('.swiper-pagination'),
                     clickable: true,
                 },
                 loop: true,
@@ -127,26 +141,70 @@ document.addEventListener("DOMContentLoaded", () => {
                     1024: { slidesPerView: 3, spaceBetween: 30 },
                 },
             });
+            
+            // Debug: Log swiper instance
+            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
+            swiperInstance.on('slideChange', () => {
+                console.log(`Swiper slide changed to index: ${swiperInstance.activeIndex}`);
+            });
 
-            swiperInstance.update(); // Ensure Swiper updates with the DOM
+            // Debugging logs
+            // console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
+            // console.log('Total slides:', swiperInstance.slides.length);
+            // console.log('Next Button:', swiperInstance.navigation.nextEl);
+            // console.log('Prev Button:', swiperInstance.navigation.prevEl);
+            
+            // Check slide change behavior
+            swiperInstance.on('slideChange', () => {
+                console.log(`Swiper slide changed to index: ${swiperInstance.activeIndex}`);
+            });
+            
+
+            // Add this line to update the swiper after initialization
+            swiperInstance.update();
+
+            // Debug: Add manual listeners to navigation buttons
+            nextButton.addEventListener('click', () => {
+                console.log(`Next button manually clicked for container: #${container.id}`);
+                swiperInstance.slideNext(); // Manually navigate to the next slide
+            });
+            prevButton.addEventListener('click', () => {
+                console.log(`Prev button manually clicked for container: #${container.id}`);
+                swiperInstance.slidePrev(); // Manually navigate to the previous slide
+            });
+            
+
+            // Check if Swiper's event listeners are properly set
+            if (swiperInstance.navigation) {
+                console.log(`Swiper navigation initialized for container: #${container.id}`, {
+                    nextEl: swiperInstance.navigation.nextEl,
+                    prevEl: swiperInstance.navigation.prevEl,
+                });
+            } else {
+                console.error(`Swiper navigation not properly initialized for container: #${container.id}`);
+            }
+
+            
+    
+            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
+            
             container.setAttribute('data-swiper-initialized', 'true');
             return;
         }
-
+    
+        // Non-carousel layouts
         container.appendChild(videoContainer);
-
-        // Populate videos for "Grid" and "List" layouts
         videos.forEach((video) => {
             const videoElement = document.createElement("div");
             videoElement.classList.add(
                 layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item"
             );
-
+    
             const title = video.snippet.title;
             const description = video.snippet.description;
             const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
             const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-
+    
             videoElement.innerHTML = `
                 <div class="video-iframe-wrapper">
                     <iframe
@@ -162,14 +220,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p class="video-description">${description}</p>
                 </div>
             `;
-
+    
             videoContainer.appendChild(videoElement);
         });
     }
+    
 
     // Iterate over each container and initialize
     containers.forEach(async (container) => {
-        console.log('Processing valid container:', container);
+        if (container.hasAttribute('data-swiper-initialized')) {
+            console.warn(`Skipping container: Already initialized for #${container.id}`);
+            return;
+        }
+
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
         renderVideos(container, videos, layout);
