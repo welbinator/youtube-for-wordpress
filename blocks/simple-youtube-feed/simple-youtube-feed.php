@@ -35,22 +35,9 @@ function render_youtube_feed_block($attributes, $content) {
     // Use block channel ID if set, otherwise use default
     $channel_id = !empty($attributes['channelId']) ? $attributes['channelId'] : $default_channel_id;
 
-    // Enqueue necessary scripts
-    wp_enqueue_script(
-        'swiper-js',
-        'https://unpkg.com/swiper@10/swiper-bundle.min.js',
-        [],
-        null,
-        true
-    );
-
-    wp_enqueue_style(
-        'swiper-css',
-        'https://unpkg.com/swiper@10/swiper-bundle.min.css',
-        [],
-        null
-    );
-
+    // Append custom class
+    $attributes['className'] = trim(($attributes['className'] ?? '') . ' youtube-feed-container');
+    
     // Localize the script with required data
     wp_localize_script(
         'yt-for-wp-simple-youtube-feed-view',
@@ -63,19 +50,20 @@ function render_youtube_feed_block($attributes, $content) {
             'siteUrl'   => get_site_url() // Add this line
         ]
     );
-
+    $unique_id = uniqid('youtube-feed-');
     // Start output buffering
     ob_start();
     ?>
     <div 
-        <?php echo get_block_wrapper_attributes(); ?>
+        <?php echo esc_attr(get_block_wrapper_attributes()); ?>
+         id="<?php echo esc_attr($unique_id); ?>"
         data-layout="<?php echo esc_attr($attributes['layout'] ?? 'grid'); ?>"
         data-max-videos="<?php echo esc_attr($attributes['maxVideos'] ?? 5); ?>"
         data-selected-playlist="<?php echo esc_attr($attributes['selectedPlaylist'] ?? ''); ?>"
         data-enable-search="<?php echo esc_attr($attributes['enableSearch'] ? 'true' : 'false'); ?>"
         data-enable-playlist-filter="<?php echo esc_attr($attributes['enablePlaylistFilter'] ? 'true' : 'false'); ?>"
         data-channel-id="<?php echo esc_attr($channel_id); ?>"
-        id="youtube-feed-container"
+        
     ></div>
     <?php
     return ob_get_clean();
