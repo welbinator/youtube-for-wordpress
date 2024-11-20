@@ -73,26 +73,32 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (layout === "list") {
             videoContainer.classList.add("youtube-feed-list");
         } else if (layout === "carousel") {
+            if (container.hasAttribute('data-swiper-initialized')) {
+                console.warn(`Swiper already initialized for container: #${container.id}`);
+                return;
+            }
+
+            console.log(`Initializing Swiper for container: #${container.id}`);
             videoContainer.classList.add("swiper-container");
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
                     ${videos
                         .map(
                             (video) => `
-                        <div class="swiper-slide">
-                            <iframe
-                                src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
-                                title="${video.snippet.title}"
-                                class="video-iframe"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                            ></iframe>
-                            <div class="video-info">
-                                <h2 class="video-title">${video.snippet.title}</h2>
-                                <p class="video-description">${video.snippet.description}</p>
+                            <div class="swiper-slide">
+                                <iframe
+                                    src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
+                                    title="${video.snippet.title}"
+                                    class="video-iframe"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                ></iframe>
+                                <div class="video-info">
+                                    <h2 class="video-title">${video.snippet.title}</h2>
+                                    <p class="video-description">${video.snippet.description}</p>
+                                </div>
                             </div>
-                        </div>
-                    `
+                        `
                         )
                         .join('')}
                 </div>
@@ -100,10 +106,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
+
             container.appendChild(videoContainer);
 
-            // Initialize Swiper.js for Carousel
-            new Swiper(`#${container.id} .swiper-container`, {
+            const swiperInstance = new Swiper(`#${container.id} .swiper-container`, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
@@ -122,7 +128,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
             });
 
-            return; // Exit early since the carousel is fully rendered
+            swiperInstance.update(); // Ensure Swiper updates with the DOM
+            container.setAttribute('data-swiper-initialized', 'true');
+            return;
         }
 
         container.appendChild(videoContainer);
@@ -159,47 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Expose functions globally for Pro use
-    YT_FOR_WP.fetchVideos = fetchVideos;
-    YT_FOR_WP.renderVideos = renderVideos;
-
     // Iterate over each container and initialize
     containers.forEach(async (container) => {
-        if (!container || !validateContainerAttributes(container)) {
-            console.warn('Skipping invalid container:', container);
-            return;
-        }
-    
         console.log('Processing valid container:', container);
-    
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
         renderVideos(container, videos, layout);
-    
-        // Hook for Pro-only features
-        if (window.wp && wp.hooks) {
-            wp.hooks.doAction('yt_for_wp_simple_feed_view', container, {
-                channelId: container.getAttribute('data-channel-id'),
-                layout,
-                maxVideos: container.getAttribute('data-max-videos'),
-            });
-        }
     });
-    
-
-
-
-    function validateContainerAttributes(container) {
-        const requiredAttributes = ['data-layout', 'data-max-videos', 'data-channel-id'];
-        for (const attr of requiredAttributes) {
-            if (!container.getAttribute(attr)) {
-                console.warn(`Container ${container.id} is missing required attribute: ${attr}`);
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    
 });
-
