@@ -22,23 +22,23 @@ jobs:
         find . -maxdepth 1 -not -name 'temp_dir' -not -name '.' -not -name '.git' -not -name '.github' -exec cp -r {} temp_dir/ \;
 
     - name: Rename directory
-      run: mv temp_dir youtube-for-wordpress
+      run: mv temp_dir yt-for-wp
 
     - name: Zip the folder
       run: |
-        zip -r youtube-for-wordpress-${{ github.event.inputs.tag }}.zip youtube-for-wordpress \
+        zip -r yt-for-wp-${{ github.event.inputs.tag }}.zip yt-for-wp \
         -x "*.git/*" "*.github/*" \
-        "youtube-for-wordpress/package.json" \
-        "youtube-for-wordpress/package-lock.json" \
-        "youtube-for-wordpress/src/*" \
-        "youtube-for-wordpress/node_modules/*" \
-        "youtube-for-wordpress/.gitignore" \
-        "youtube-for-wordpress/webpack.config.js"
+        "yt-for-wp/package.json" \
+        "yt-for-wp/package-lock.json" \
+        "yt-for-wp/src/*" \
+        "yt-for-wp/node_modules/*" \
+        "yt-for-wp/.gitignore" \
+        "yt-for-wp/webpack.config.js"
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: youtube-for-wordpress-${{ github.event.inputs.tag }}.zip
+        files: yt-for-wp-${{ github.event.inputs.tag }}.zip
         tag_name: ${{ github.event.inputs.tag }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
