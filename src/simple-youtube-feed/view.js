@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     
         if (container.hasAttribute('data-swiper-initialized')) {
-            console.warn(`Skipping container: Already initialized for #${container.id}`);
+            console.warn(`Skipping container 1: Already initialized for #${container.id}`);
             return;
         }
     
@@ -104,8 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
             container.appendChild(videoContainer);
     
-            console.log(`Initializing Swiper for container: #${container.id}`);
-
+            
             const nextButton = container.querySelector('.swiper-button-next');
             const prevButton = container.querySelector('.swiper-button-prev');
     
@@ -117,12 +116,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
     
-            console.log(`Next Button Selector:`, nextButton);
-            console.log(`Prev Button Selector:`, prevButton);
+           
     
             // Initialize Swiper
-            console.log(`Initializing Swiper for container: #${container.id}`);
-            const swiperInstance = new Swiper(`#${container.id} .swiper-container`, {
+                const swiperInstance = new Swiper(`#${container.id} .swiper-container`, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
@@ -142,35 +139,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
             });
             
-            // Debug: Log swiper instance
-            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
-            swiperInstance.on('slideChange', () => {
-                console.log(`Swiper slide changed to index: ${swiperInstance.activeIndex}`);
-            });
-
-            // Debugging logs
-            // console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
-            // console.log('Total slides:', swiperInstance.slides.length);
-            // console.log('Next Button:', swiperInstance.navigation.nextEl);
-            // console.log('Prev Button:', swiperInstance.navigation.prevEl);
-            
-            // Check slide change behavior
-            swiperInstance.on('slideChange', () => {
-                console.log(`Swiper slide changed to index: ${swiperInstance.activeIndex}`);
-            });
+           
             
 
             // Add this line to update the swiper after initialization
             swiperInstance.update();
 
-            // Debug: Add manual listeners to navigation buttons
+            // Add manual listeners to navigation buttons
             nextButton.addEventListener('click', () => {
-                console.log(`Next button manually clicked for container: #${container.id}`);
-                swiperInstance.slideNext(); // Manually navigate to the next slide
+                swiperInstance.slideNext();
             });
             prevButton.addEventListener('click', () => {
-                console.log(`Prev button manually clicked for container: #${container.id}`);
-                swiperInstance.slidePrev(); // Manually navigate to the previous slide
+                swiperInstance.slidePrev();
             });
             
 
