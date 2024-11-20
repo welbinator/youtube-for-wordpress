@@ -1,4 +1,4 @@
-=== YouTube for WordPress ===
+=== YT for WP ===
 
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
