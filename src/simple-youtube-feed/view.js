@@ -1,40 +1,30 @@
 import Swiper from 'swiper';
 import 'swiper/css';
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.querySelector("[id^='youtube-feed-']");
+document.addEventListener("DOMContentLoaded", () => {
+    // Select all YouTube feed containers
+    const containers = document.querySelectorAll("[id^='youtube-feed-']");
 
-
-    // Ensure container is available and not already initialized
-    if (!container) {
-        console.warn("YouTube feed container not found.");
+    if (!containers.length) {
+        console.warn("YouTube feed containers not found.");
         return;
     }
-
-    if (container.hasAttribute('data-initialized')) {
-        return;
-    }
-
-    container.setAttribute('data-initialized', 'true');
-
-    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
-    const layout = container.getAttribute('data-layout') || 'grid';
-    const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
-    const apiUrlBase = `https://www.googleapis.com/youtube/v3`;
-    const apiKey = YT_FOR_WP.apiKey;
 
     // Cache for avoiding repeated queries
     const cache = {};
 
     // Function to fetch videos
-    async function fetchVideos(searchQuery = '', playlistId = '') {
+    async function fetchVideos(container, searchQuery = '', playlistId = '') {
+        const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
+        const layout = container.getAttribute('data-layout') || 'grid';
+        const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
         const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
 
         if (cache[cacheKey]) return cache[cacheKey];
 
-        let apiUrl = `${apiUrlBase}/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${apiKey}`;
+        let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
         if (playlistId) {
-            apiUrl = `${apiUrlBase}/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${apiKey}`;
+            apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
         }
         if (searchQuery) {
             apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
@@ -57,7 +47,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // Render videos
+    // Function to fetch playlists
+    async function fetchPlaylists(container) {
+        const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
+    
+        if (!channelId || !YT_FOR_WP.apiKey) {
+            return [{ label: 'No playlists available', value: '' }];
+        }
+    
+        try {
+            const response = await fetch(
+                `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${channelId}&maxResults=25&key=${YT_FOR_WP.apiKey}`
+            );
+            const data = await response.json();
+    
+            if (data.error) {
+                console.error('YouTube API Error:', data.error);
+                return [{ label: 'Error loading playlists', value: '' }];
+            }
+    
+            const playlists = data.items
+                ? data.items.map((playlist) => ({
+                      label: playlist.snippet.title,
+                      value: playlist.id,
+                  }))
+                : [{ label: 'No playlists found', value: '' }];
+    
+            // Add the "All Videos" option at the start of the array
+            playlists.unshift({ label: 'All Videos', value: '' });
+    
+            return playlists;
+        } catch (error) {
+            console.error('Error fetching playlists:', error);
+            return [{ label: 'Error loading playlists', value: '' }];
+        }
+    }
+    
+
+    // Function to render videos
     function renderVideos(container, videos, layout) {
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
@@ -102,15 +129,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             container.appendChild(videoContainer);
 
             // Initialize Swiper.js for Carousel
-            new Swiper(`#${uniqueId} .swiper-container`, {
+            new Swiper(`#${container.id} .swiper-container`, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
+                    nextEl: `#${container.id} .swiper-button-next`,
+                    prevEl: `#${container.id} .swiper-button-prev`,
                 },
                 pagination: {
-                    el: ".swiper-pagination",
+                    el: `#${container.id} .swiper-pagination`,
                     clickable: true,
                 },
                 loop: true,
@@ -158,16 +185,59 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Expose functions globally for Pro use
-    YT_FOR_WP.fetchVideos = fetchVideos;
-    YT_FOR_WP.renderVideos = renderVideos;
+    // Function to add search and playlist functionality
+    async function addControls(container, layout, fetchVideosFn, renderVideosFn) {
+        const controlsContainer = document.createElement("div");
+        controlsContainer.classList.add("controls-container");
 
-    // Fetch and render videos
-    const videos = await fetchVideos();
-    renderVideos(container, videos, layout);
+        // Create a search bar
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.placeholder = "Search videos...";
+        searchInput.classList.add("search-input");
 
-    // Hook for Pro-only features
-    if (window.wp && wp.hooks) {
-        wp.hooks.doAction('yt_for_wp_simple_feed_view', container, { channelId, layout, maxVideos });
+        // Create a playlist dropdown
+        const playlistSelect = document.createElement("select");
+        playlistSelect.classList.add("playlist-select");
+
+        // Fetch and populate playlists
+        const playlists = await fetchPlaylists(container);
+        playlists.forEach((playlist) => {
+            const option = document.createElement("option");
+            option.value = playlist.value;
+            option.textContent = playlist.label;
+            playlistSelect.appendChild(option);
+        });
+
+        controlsContainer.appendChild(searchInput);
+        controlsContainer.appendChild(playlistSelect);
+
+        // Add event listeners
+        searchInput.addEventListener("input", async () => {
+            const searchQuery = searchInput.value;
+            const videos = await fetchVideosFn(container, searchQuery, playlistSelect.value);
+            renderVideosFn(container, videos, layout);
+        });
+
+        playlistSelect.addEventListener("change", async () => {
+            const playlistId = playlistSelect.value;
+            const videos = await fetchVideosFn(container, searchInput.value, playlistId);
+            renderVideosFn(container, videos, layout);
+        });
+
+        container.prepend(controlsContainer);
     }
+
+    // Iterate over each container and initialize
+    containers.forEach(async (container) => {
+        if (container.hasAttribute('data-initialized')) {
+            return;
+        }
+
+        container.setAttribute('data-initialized', 'true');
+        const layout = container.getAttribute('data-layout') || 'grid';
+        const videos = await fetchVideos(container);
+        renderVideos(container, videos, layout);
+        addControls(container, layout, fetchVideos, renderVideos);
+    });
 });
