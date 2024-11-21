@@ -1,10 +1,12 @@
 import Swiper from 'swiper';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 document.addEventListener("DOMContentLoaded", () => {
     // Select all YouTube feed containers
     const containers = document.querySelectorAll("[id^='youtube-feed-']");
-    console.log('Found containers:', containers);
 
     if (!containers.length) {
         console.warn("YouTube feed containers not found.");
@@ -60,6 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Clear any existing swiper initialization flag
+        container.removeAttribute('data-swiper-initialized');
+
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
             existingVideoContainer.remove();
@@ -73,26 +78,26 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (layout === "list") {
             videoContainer.classList.add("youtube-feed-list");
         } else if (layout === "carousel") {
-            videoContainer.classList.add("swiper-container");
+            videoContainer.classList.add("swiper");
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
                     ${videos
                         .map(
                             (video) => `
-                        <div class="swiper-slide">
-                            <iframe
-                                src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
-                                title="${video.snippet.title}"
-                                class="video-iframe"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                            ></iframe>
-                            <div class="video-info">
-                                <h2 class="video-title">${video.snippet.title}</h2>
-                                <p class="video-description">${video.snippet.description}</p>
+                            <div class="swiper-slide">
+                                <iframe
+                                    src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
+                                    title="${video.snippet.title}"
+                                    class="video-iframe"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                ></iframe>
+                                <div class="video-info">
+                                    <h2 class="video-title">${video.snippet.title}</h2>
+                                    <p class="video-description">${video.snippet.description}</p>
+                                </div>
                             </div>
-                        </div>
-                    `
+                        `
                         )
                         .join('')}
                 </div>
@@ -100,18 +105,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
+
             container.appendChild(videoContainer);
 
-            // Initialize Swiper.js for Carousel
-            new Swiper(`#${container.id} .swiper-container`, {
+            // Initialize Swiper with proper configuration
+            const swiperInstance = new Swiper(videoContainer, {
+                modules: [Navigation, Pagination],
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
-                    nextEl: `#${container.id} .swiper-button-next`,
-                    prevEl: `#${container.id} .swiper-button-prev`,
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
                 },
                 pagination: {
-                    el: `#${container.id} .swiper-pagination`,
+                    el: '.swiper-pagination',
                     clickable: true,
                 },
                 loop: true,
@@ -120,14 +127,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     768: { slidesPerView: 2, spaceBetween: 20 },
                     1024: { slidesPerView: 3, spaceBetween: 30 },
                 },
+                on: {
+                    init: function() {
+                        console.log(`Swiper initialized for container: #${container.id}`);
+                    }
+                }
             });
 
-            return; // Exit early since the carousel is fully rendered
+            // Set initialization flag after successful initialization
+            container.setAttribute('data-swiper-initialized', 'true');
+
+            return;
         }
 
+        // Non-carousel layouts
         container.appendChild(videoContainer);
-
-        // Populate videos for "Grid" and "List" layouts
         videos.forEach((video) => {
             const videoElement = document.createElement("div");
             videoElement.classList.add(
@@ -159,47 +173,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Expose functions globally for Pro use
-    YT_FOR_WP.fetchVideos = fetchVideos;
-    YT_FOR_WP.renderVideos = renderVideos;
+    // Process each container only once
+    const processedContainers = new Set();
 
     // Iterate over each container and initialize
     containers.forEach(async (container) => {
-        if (!container || !validateContainerAttributes(container)) {
-            console.warn('Skipping invalid container:', container);
+        if (processedContainers.has(container.id)) {
             return;
         }
-    
-        console.log('Processing valid container:', container);
-    
+
+        processedContainers.add(container.id);
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
         renderVideos(container, videos, layout);
-    
-        // Hook for Pro-only features
-        if (window.wp && wp.hooks) {
-            wp.hooks.doAction('yt_for_wp_simple_feed_view', container, {
-                channelId: container.getAttribute('data-channel-id'),
-                layout,
-                maxVideos: container.getAttribute('data-max-videos'),
-            });
-        }
     });
-    
-
-
-
-    function validateContainerAttributes(container) {
-        const requiredAttributes = ['data-layout', 'data-max-videos', 'data-channel-id'];
-        for (const attr of requiredAttributes) {
-            if (!container.getAttribute(attr)) {
-                console.warn(`Container ${container.id} is missing required attribute: ${attr}`);
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    
 });
-
