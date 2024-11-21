@@ -173,6 +173,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Export fetchVideos and renderVideos to the global YT_FOR_WP object
+        if (!window.YT_FOR_WP) {
+            window.YT_FOR_WP = {};
+        }
+
+        window.YT_FOR_WP.fetchVideos = fetchVideos;
+        window.YT_FOR_WP.renderVideos = renderVideos;
     // Process each container only once
     const processedContainers = new Set();
 
@@ -186,5 +193,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
         renderVideos(container, videos, layout);
+
+        // Hook for Pro-only features
+        if (window.wp && wp.hooks) {
+            wp.hooks.doAction('yt_for_wp_simple_feed_view', container, {
+                channelId: container.getAttribute('data-channel-id'),
+                layout,
+                maxVideos: container.getAttribute('data-max-videos'),
+            });
+        }
     });
 });
