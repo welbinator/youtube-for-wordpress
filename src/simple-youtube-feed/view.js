@@ -73,7 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const videoContainer = document.createElement("div");
         videoContainer.classList.add("video-container");
     
-        if (layout === "carousel") {
+        if (layout === "grid") {
+            videoContainer.classList.add("youtube-feed-grid");
+        } else if (layout === "list") {
+            videoContainer.classList.add("youtube-feed-list");
+        } else if (layout === "carousel") {
             videoContainer.classList.add("swiper-container");
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
@@ -101,13 +105,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
-    
+        
             container.appendChild(videoContainer);
-    
-            
-            const nextButton = container.querySelector('.swiper-button-next');
-            const prevButton = container.querySelector('.swiper-button-prev');
-    
+        
+            const nextButton = videoContainer.querySelector('.swiper-button-next');
+            const prevButton = videoContainer.querySelector('.swiper-button-prev');
+        
+            console.log(`Next Button:`, nextButton);
+            console.log(`Prev Button:`, prevButton);
+        
             if (!nextButton || !prevButton) {
                 console.error('Navigation buttons are missing for Swiper:', {
                     nextButton,
@@ -115,20 +121,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 return;
             }
-    
-           
-    
+        
             // Initialize Swiper
-                const swiperInstance = new Swiper(`#${container.id} .swiper-container`, {
+            const swiperInstance = new Swiper(videoContainer, {
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
-                    nextEl: container.querySelector('.swiper-button-next'),
-                    prevEl: container.querySelector('.swiper-button-prev'),
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
                 },
-                
                 pagination: {
-                    el: container.querySelector('.swiper-pagination'),
+                    el: '.swiper-pagination',
                     clickable: true,
                 },
                 loop: true,
@@ -138,23 +141,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     1024: { slidesPerView: 3, spaceBetween: 30 },
                 },
             });
-            
-           
-            
-
-            // Add this line to update the swiper after initialization
+        
+            // Update Swiper after initialization
             swiperInstance.update();
 
-            // Add manual listeners to navigation buttons
+            // Debugging: Add manual listeners
             nextButton.addEventListener('click', () => {
+              
                 swiperInstance.slideNext();
             });
             prevButton.addEventListener('click', () => {
+               
                 swiperInstance.slidePrev();
             });
-            
-
-            // Check if Swiper's event listeners are properly set
+        
+            // Debugging logs for navigation buttons
             if (swiperInstance.navigation) {
                 console.log(`Swiper navigation initialized for container: #${container.id}`, {
                     nextEl: swiperInstance.navigation.nextEl,
@@ -163,14 +164,13 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 console.error(`Swiper navigation not properly initialized for container: #${container.id}`);
             }
-
-            
-    
-            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
-            
+        
             container.setAttribute('data-swiper-initialized', 'true');
+            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
+        
             return;
         }
+        
     
         // Non-carousel layouts
         container.appendChild(videoContainer);
