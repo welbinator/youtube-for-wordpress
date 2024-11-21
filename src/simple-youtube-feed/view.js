@@ -1,10 +1,12 @@
 import Swiper from 'swiper';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 document.addEventListener("DOMContentLoaded", () => {
     // Select all YouTube feed containers
     const containers = document.querySelectorAll("[id^='youtube-feed-']");
-    
 
     if (!containers.length) {
         console.warn("YouTube feed containers not found.");
@@ -59,26 +61,24 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Invalid container element.');
             return;
         }
-    
-        if (container.hasAttribute('data-swiper-initialized')) {
-            console.warn(`Skipping container 1: Already initialized for #${container.id}`);
-            return;
-        }
-    
+
+        // Clear any existing swiper initialization flag
+        container.removeAttribute('data-swiper-initialized');
+
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
             existingVideoContainer.remove();
         }
-    
+
         const videoContainer = document.createElement("div");
         videoContainer.classList.add("video-container");
-    
+
         if (layout === "grid") {
             videoContainer.classList.add("youtube-feed-grid");
         } else if (layout === "list") {
             videoContainer.classList.add("youtube-feed-list");
         } else if (layout === "carousel") {
-            videoContainer.classList.add("swiper-container");
+            videoContainer.classList.add("swiper");
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
                     ${videos
@@ -105,25 +105,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
-        
+
             container.appendChild(videoContainer);
-        
-            const nextButton = videoContainer.querySelector('.swiper-button-next');
-            const prevButton = videoContainer.querySelector('.swiper-button-prev');
-        
-            console.log(`Next Button:`, nextButton);
-            console.log(`Prev Button:`, prevButton);
-        
-            if (!nextButton || !prevButton) {
-                console.error('Navigation buttons are missing for Swiper:', {
-                    nextButton,
-                    prevButton,
-                });
-                return;
-            }
-        
-            // Initialize Swiper
+
+            // Initialize Swiper with proper configuration
             const swiperInstance = new Swiper(videoContainer, {
+                modules: [Navigation, Pagination],
                 slidesPerView: 1,
                 spaceBetween: 10,
                 navigation: {
@@ -140,38 +127,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     768: { slidesPerView: 2, spaceBetween: 20 },
                     1024: { slidesPerView: 3, spaceBetween: 30 },
                 },
+                on: {
+                    init: function() {
+                        console.log(`Swiper initialized for container: #${container.id}`);
+                    }
+                }
             });
-        
-            // Update Swiper after initialization
-            swiperInstance.update();
 
-            // Debugging: Add manual listeners
-            nextButton.addEventListener('click', () => {
-              
-                swiperInstance.slideNext();
-            });
-            prevButton.addEventListener('click', () => {
-               
-                swiperInstance.slidePrev();
-            });
-        
-            // Debugging logs for navigation buttons
-            if (swiperInstance.navigation) {
-                console.log(`Swiper navigation initialized for container: #${container.id}`, {
-                    nextEl: swiperInstance.navigation.nextEl,
-                    prevEl: swiperInstance.navigation.prevEl,
-                });
-            } else {
-                console.error(`Swiper navigation not properly initialized for container: #${container.id}`);
-            }
-        
+            // Set initialization flag after successful initialization
             container.setAttribute('data-swiper-initialized', 'true');
-            console.log(`Swiper initialized for container: #${container.id}`, swiperInstance);
-        
+
             return;
         }
-        
-    
+
         // Non-carousel layouts
         container.appendChild(videoContainer);
         videos.forEach((video) => {
@@ -179,12 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
             videoElement.classList.add(
                 layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item"
             );
-    
+
             const title = video.snippet.title;
             const description = video.snippet.description;
             const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
             const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-    
+
             videoElement.innerHTML = `
                 <div class="video-iframe-wrapper">
                     <iframe
@@ -200,19 +168,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p class="video-description">${description}</p>
                 </div>
             `;
-    
+
             videoContainer.appendChild(videoElement);
         });
     }
-    
+
+    // Process each container only once
+    const processedContainers = new Set();
 
     // Iterate over each container and initialize
     containers.forEach(async (container) => {
-        if (container.hasAttribute('data-swiper-initialized')) {
-            console.warn(`Skipping container: Already initialized for #${container.id}`);
+        if (processedContainers.has(container.id)) {
             return;
         }
 
+        processedContainers.add(container.id);
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
         renderVideos(container, videos, layout);
