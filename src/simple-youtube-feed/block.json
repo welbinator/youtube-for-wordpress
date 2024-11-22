@@ -5,7 +5,7 @@
     "version": "0.1.0",
     "title": "Simple Youtube Feed",
     "category": "widgets",
-    "icon": "smiley",
+    "icon": "video-alt",
     "description": "Example block scaffolded with Create Block tool.",
     "supports": {
         "html": false
