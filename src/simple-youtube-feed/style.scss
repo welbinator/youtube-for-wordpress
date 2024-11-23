@@ -11,7 +11,11 @@
         flex-direction: row;
     }
     .youtube-playlist-dropdown {
-        max-width: 200px;
+        // max-width: 200px;
+    }
+    .youtube-search-bar {
+        width: 100%;
+        max-width: 350px;
     }
 }
 .youtube-search-container {
