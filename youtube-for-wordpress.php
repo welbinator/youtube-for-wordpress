@@ -74,6 +74,13 @@ require_once YT_FOR_WP_PATH . 'includes/admin-settings.php';
 require_once YT_FOR_WP_PATH . 'blocks/simple-youtube-feed/simple-youtube-feed.php';
 require_once YT_FOR_WP_PATH . 'blocks/youtube-live/youtube-live.php';
 
+if (file_exists('github-update.php')) {
+    include 'github-update.php';
+} else {
+    echo 'File not found.';
+}
+
+
 // Register settings page.
 function add_admin_menu() {
     add_menu_page(
