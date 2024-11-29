@@ -3,7 +3,7 @@
  * Plugin Name: YT for WP
  * Plugin URI: https://youtubeforwp.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: James Welbes
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('YOUTUBE_FOR_WP_VERSION', '1.0.4');
+define('YOUTUBE_FOR_WP_VERSION', '1.0.5');
 define('YT_FOR_WP_PATH', plugin_dir_path(__FILE__));
 define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
@@ -73,6 +73,13 @@ add_action('init', __NAMESPACE__ . '\\load_textdomain');
 require_once YT_FOR_WP_PATH . 'includes/admin-settings.php';
 require_once YT_FOR_WP_PATH . 'blocks/simple-youtube-feed/simple-youtube-feed.php';
 require_once YT_FOR_WP_PATH . 'blocks/youtube-live/youtube-live.php';
+
+if (file_exists('github-update.php')) {
+    include 'github-update.php';
+} else {
+    echo 'File not found.';
+}
+
 
 // Register settings page.
 function add_admin_menu() {
@@ -133,4 +140,56 @@ function yt_for_wp_enqueue_assets() {
     }
 }
 add_action('enqueue_block_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_assets');
+
+function my_plugin_check_for_updates($transient) {
+    // Your GitHub username and repository name
+    $owner = 'welbinator';
+    $repo = 'youtube-for-wordpress';
+
+    // Only proceed if this is a plugin update check
+    if (empty($transient->checked)) {
+        return $transient;
+    }
+
+    // GitHub API URL to get the latest release
+    $api_url = "https://api.github.com/repos/$owner/$repo/releases/latest";
+
+    // Fetch the latest release information
+    $response = wp_remote_get($api_url, ['headers' => ['User-Agent' => 'WordPress']]);
+    if (is_wp_error($response)) {
+        return $transient; // Return early if there's an error
+    }
+
+    $release = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (isset($release['tag_name']) && isset($release['assets'][0]['browser_download_url'])) {
+        $latest_version = ltrim($release['tag_name'], 'v'); // Remove "v" prefix if present
+        $download_url = $release['assets'][0]['browser_download_url'];
+
+        // Plugin's current version from its header
+        $plugin_data = get_plugin_data(__FILE__);
+        $current_version = $plugin_data['Version'];
+
+        // Check if a new version is available
+        if (version_compare($latest_version, $current_version, '>')) {
+            $plugin_slug = plugin_basename(__FILE__);
+
+            $transient->response[$plugin_slug] = (object) [
+                'slug' => $plugin_slug,
+                'new_version' => $latest_version,
+                'package' => $download_url,
+                'url' => $release['html_url'], // Link to the release page
+            ];
+        }
+    }
+
+    return $transient;
+}
+add_filter('pre_set_site_transient_update_plugins', __NAMESPACE__ . '\\my_plugin_check_for_updates');
+
+function github_plugin_updater_user_agent($args) {
+    $args['user-agent'] = 'WordPress/' . get_bloginfo('version') . '; ' . home_url();
+    return $args;
+}
+add_filter('http_request_args', __NAMESPACE__ . '\\github_plugin_updater_user_agent', 10, 1);
 
