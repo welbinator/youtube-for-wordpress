@@ -3,7 +3,7 @@
  * Plugin Name: YT for WP
  * Plugin URI: https://youtubeforwp.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: James Welbes
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('YOUTUBE_FOR_WP_VERSION', '1.0.5');
+define('YOUTUBE_FOR_WP_VERSION', '1.0.6');
 define('YT_FOR_WP_PATH', plugin_dir_path(__FILE__));
 define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
@@ -40,26 +40,30 @@ if (!defined('YOUTUBE_FOR_WP_ACTIVE')) {
  * Check PHP and WordPress versions before activation
  */
 function activation_check() {
+    $errors = [];
     if (version_compare(PHP_VERSION, YT_FOR_WP_MIN_PHP_VERSION, '<')) {
-        deactivate_plugins(plugin_basename(__FILE__));
-        wp_die(sprintf(
-            // Translators: %s is the required PHP version (e.g., "7.4").
+        $errors[] = sprintf(
             esc_html__('YouTube for WordPress requires PHP version %s or higher.', 'youtube-for-wordpress'),
             esc_html(YT_FOR_WP_MIN_PHP_VERSION)
-        ));
+        );
     }
 
     if (version_compare($GLOBALS['wp_version'], YT_FOR_WP_MIN_WP_VERSION, '<')) {
-        deactivate_plugins(plugin_basename(__FILE__));
-        wp_die(sprintf(
-            // Translators: %s is the required WordPress version (e.g., "5.8").
+        $errors[] = sprintf(
             esc_html__('YouTube for WordPress requires WordPress version %s or higher.', 'youtube-for-wordpress'),
             esc_html(YT_FOR_WP_MIN_WP_VERSION)
-        ));
+        );
+    }
+
+    if ($errors) {
+        deactivate_plugins(plugin_basename(__FILE__));
+        add_settings_error('youtube-for-wordpress', 'activation_error', implode('<br>', $errors), 'error');
+        wp_redirect(admin_url('plugins.php'));
+        exit;
     }
 }
-
 register_activation_hook(__FILE__, __NAMESPACE__ . '\\activation_check');
+
 
 /**
  * Load text domain for internationalization
@@ -74,10 +78,10 @@ require_once YT_FOR_WP_PATH . 'includes/admin-settings.php';
 require_once YT_FOR_WP_PATH . 'blocks/simple-youtube-feed/simple-youtube-feed.php';
 require_once YT_FOR_WP_PATH . 'blocks/youtube-live/youtube-live.php';
 
-if (file_exists('github-update.php')) {
-    include 'github-update.php';
+if (file_exists(YT_FOR_WP_PATH . 'github-update.php')) {
+    include YT_FOR_WP_PATH . 'github-update.php';
 } else {
-    echo 'File not found.';
+    error_log('github-update.php not found in ' . YT_FOR_WP_PATH);
 }
 
 
@@ -96,7 +100,6 @@ function add_admin_menu() {
 add_action('admin_menu', __NAMESPACE__ . '\\add_admin_menu');
 
 function yt_for_wp_enqueue_assets() {
-    // Shared data for both front-end and editor
     $api_key = \YouTubeForWP\Admin\Settings\get_api_key();
     $channel_id = get_option('yt_for_wp_channel_id');
     $localize_data = [
@@ -108,40 +111,25 @@ function yt_for_wp_enqueue_assets() {
 
     // Enqueue front-end assets
     if (!is_admin()) {
-        wp_enqueue_style(
-            'swiper-css',
-            plugins_url('build/css/swiper-bundle.min.css', __FILE__),
-            [],
-            YOUTUBE_FOR_WP_VERSION
-        );
-
-        wp_enqueue_script(
-            'youtube-for-wordpress-simple-youtube-feed-view',
-            plugins_url('build/simple-youtube-feed/view.js', __FILE__),
-            [],
-            YOUTUBE_FOR_WP_VERSION,
-            true
-        );
-
+        wp_enqueue_style('swiper-css', plugins_url('build/css/swiper-bundle.min.css', __FILE__), [], YOUTUBE_FOR_WP_VERSION);
+        wp_enqueue_script('youtube-for-wordpress-simple-youtube-feed-view', plugins_url('build/simple-youtube-feed/view.js', __FILE__), [], YOUTUBE_FOR_WP_VERSION, true);
         wp_localize_script('youtube-for-wordpress-simple-youtube-feed-view', 'YT_FOR_WP', $localize_data);
-    }
-
-    // Enqueue editor-specific assets
-    if (is_admin()) {
-        wp_enqueue_script(
-            'youtube-for-wordpress-simple-youtube-feed-editor',
-            plugins_url('build/simple-youtube-feed/index.js', __FILE__), // Adjust if needed
-            ['wp-blocks', 'wp-element', 'wp-editor'],
-            YOUTUBE_FOR_WP_VERSION,
-            true
-        );
-
+    } else {
+        // Enqueue editor assets
+        wp_enqueue_script('youtube-for-wordpress-simple-youtube-feed-editor', plugins_url('build/simple-youtube-feed/index.js', __FILE__), ['wp-blocks', 'wp-element', 'wp-editor'], YOUTUBE_FOR_WP_VERSION, true);
         wp_localize_script('youtube-for-wordpress-simple-youtube-feed-editor', 'YT_FOR_WP', $localize_data);
     }
 }
 add_action('enqueue_block_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_assets');
 
+
 function my_plugin_check_for_updates($transient) {
+    $plugin_slug = plugin_basename(__FILE__);
+
+    // Only process if our plugin is in the list of checked plugins
+    if (empty($transient->checked) || !isset($transient->checked[$plugin_slug])) {
+        return $transient;
+    }
     // Your GitHub username and repository name
     $owner = 'welbinator';
     $repo = 'youtube-for-wordpress';

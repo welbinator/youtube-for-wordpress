@@ -3,7 +3,7 @@
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
 Requires at least: 5.8  
-Stable tag: 1.0.5  
+Stable tag: 1.0.6  
 Tested up to: 6.7  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
@@ -37,6 +37,14 @@ Visit our website for more information on how to get started: [Getting Started G
 3. Carousel layout with playlist filtering.
 
 == Changelog ==
+
+= 1.0.6 =
+* Fixed: Resolved unexpected output during plugin activation caused by incorrect file handling and output.
+* Fixed: Addressed an issue where enabling the plugin interfered with updating other plugins.
+* Improved: Enhanced compatibility checks for PHP and WordPress versions during activation, ensuring proper error reporting without unintended output.
+* Improved: Consolidated and streamlined asset enqueuing for both front-end and editor environments.
+* Improved: Updated GitHub updater logic to prevent interference with other plugin updates.
+* Debugging: Added error logging for missing files and unexpected outputs during plugin execution.
 
 = 1.0.5 =
 * Add GitHub Updater
