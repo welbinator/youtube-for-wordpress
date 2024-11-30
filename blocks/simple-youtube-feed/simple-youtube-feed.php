@@ -70,17 +70,16 @@ function render_youtube_feed_block($attributes, $content) {
 }
 
 /**
- * Fetches YouTube videos for the feed.
+ * Fetches YouTube videos for the feed with backend caching.
  *
  * @return array Video data or an empty array on failure.
  */
-function fetch_youtube_feed_videos() {
-    $api_key = \YouTubeForWP\Admin\Settings\get_api_key();
-    $channel_id = get_option('yt_for_wp_channel_id');
-    $max_results = 5;
+function fetch_youtube_feed_videos($channel_id, $api_key, $max_results = 5) {
+    $cache_key = "yt_for_wp_videos_{$channel_id}_{$max_results}";
+    $cached_videos = get_transient($cache_key);
 
-    if (empty($api_key) || empty($channel_id)) {
-        return [];
+    if ($cached_videos) {
+        return $cached_videos;
     }
 
     $api_url = add_query_arg([
@@ -89,7 +88,7 @@ function fetch_youtube_feed_videos() {
         'part' => 'snippet',
         'type' => 'video',
         'order' => 'date',
-        'maxResults' => $max_results
+        'maxResults' => $max_results,
     ], 'https://www.googleapis.com/youtube/v3/search');
 
     $response = wp_remote_get($api_url);
@@ -99,5 +98,49 @@ function fetch_youtube_feed_videos() {
     }
 
     $data = json_decode(wp_remote_retrieve_body($response), true);
-    return $data['items'] ?? [];
+
+    $videos = array_map(function ($video) {
+        return [
+            'id' => $video['id']['videoId'],
+            'title' => $video['snippet']['title'],
+            'description' => $video['snippet']['description'],
+            'publishedAt' => $video['snippet']['publishedAt'],
+            'thumbnail' => $video['snippet']['thumbnails']['medium']['url'],
+        ];
+    }, $data['items'] ?? []);
+
+    // Cache the result for 1 hour (3600 seconds)
+    set_transient($cache_key, $videos, 3600);
+
+    return $videos;
 }
+
+
+add_action('rest_api_init', function () {
+    register_rest_route('youtube-for-wordpress/v1', '/videos', [
+        'methods' => 'GET',
+        'callback' => function (\WP_REST_Request $request) {
+    $channel_id = $request->get_param('channelId') ?? get_option('yt_for_wp_channel_id');
+    $max_results = intval($request->get_param('maxResults') ?? 5);
+    $api_key = \YouTubeForWP\Admin\Settings\get_api_key();
+
+    if (!$channel_id || !$api_key) {
+        return new \WP_Error(
+            'missing_parameters',
+            __('Channel ID or API key is missing.', 'yt-for-wp'),
+            ['status' => 400]
+        );
+    }
+
+    $videos = fetch_youtube_feed_videos($channel_id, $api_key, $max_results);
+
+    // Add debug log
+    error_log('Fetched videos: ' . print_r($videos, true));
+
+    return rest_ensure_response($videos);
+},
+
+        'permission_callback' => '__return_true',
+    ]);
+});
+
