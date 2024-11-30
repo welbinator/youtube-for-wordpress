@@ -27,10 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
         const cacheKey = `${container.id}-${channelId}-${maxVideos}-${searchQuery}-${playlistId}`;
     
-        if (cache[cacheKey]) return cache[cacheKey];
+        // Check if the data is already cached
+        if (cache[cacheKey]) {
+            
+            return cache[cacheKey];
+        }
     
         let apiUrl;
     
+        // Construct the API URL based on whether a playlistId is provided
         if (playlistId) {
             apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
         } else {
@@ -40,14 +45,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     
-      
-    
+            
         try {
             const response = await fetch(apiUrl, {
                 headers: {
-                    'X-WP-Nonce': YT_FOR_WP.nonce,
+                    'X-WP-Nonce': YT_FOR_WP.nonce, // Include nonce for REST API
                 },
             });
+    
             const data = await response.json();
     
             if (data.error || data.code) {
@@ -55,20 +60,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 return [];
             }
     
-           
-    
             // Map API response to the expected structure for rendering
             const videos = (data || []).map((video) => ({
                 id: video.id,
-                title: video.title,
-                description: video.description,
-                thumbnail: video.thumbnail,
-                publishedAt: video.publishedAt,
+                title: video.title || video.snippet?.title || 'Untitled Video',
+                description: video.description || video.snippet?.description || 'No description available.',
+                thumbnail: video.thumbnail || video.snippet?.thumbnails?.high?.url,
+                publishedAt: video.publishedAt || video.snippet?.publishedAt,
             }));
-    
-            
-    
+        
+            // Cache the processed videos for subsequent calls
             cache[cacheKey] = videos;
+    
             return videos;
         } catch (error) {
             console.error('Error fetching videos:', error);

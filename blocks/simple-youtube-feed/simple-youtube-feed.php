@@ -75,13 +75,22 @@ function render_youtube_feed_block($attributes, $content) {
  * @return array Video data or an empty array on failure.
  */
 function fetch_youtube_feed_videos($channel_id, $api_key, $max_results = 5) {
+    // Sanitize and validate input
+    if (empty($channel_id) || empty($api_key)) {
+        error_log('Missing required parameters: channel_id or api_key.');
+        return [];
+    }
+
+    // Create a unique cache key
     $cache_key = "yt_for_wp_videos_{$channel_id}_{$max_results}";
     $cached_videos = get_transient($cache_key);
 
     if ($cached_videos) {
+        // Return cached data if available
         return $cached_videos;
     }
 
+    // Construct the YouTube API URL
     $api_url = add_query_arg([
         'key' => $api_key,
         'channelId' => $channel_id,
@@ -91,29 +100,55 @@ function fetch_youtube_feed_videos($channel_id, $api_key, $max_results = 5) {
         'maxResults' => $max_results,
     ], 'https://www.googleapis.com/youtube/v3/search');
 
+    // Fetch the data from YouTube API
     $response = wp_remote_get($api_url);
 
     if (is_wp_error($response)) {
+        error_log('YouTube API Request Error: ' . $response->get_error_message());
         return [];
     }
 
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
+    if (isset($data['error'])) {
+        error_log('YouTube API Error: ' . json_encode($data['error']));
+        return [];
+    }
+
+    // Map the API response to the expected structure
     $videos = array_map(function ($video) {
+        // Check for required keys to avoid PHP warnings
+        $video_id = $video['id']['videoId'] ?? null;
+        $snippet = $video['snippet'] ?? [];
+        $thumbnails = $snippet['thumbnails']['medium']['url'] ?? '';
+
+        if (!$video_id || !$snippet) {
+            return null; // Skip invalid entries
+        }
+
         return [
-            'id' => $video['id']['videoId'],
-            'title' => $video['snippet']['title'],
-            'description' => $video['snippet']['description'],
-            'publishedAt' => $video['snippet']['publishedAt'],
-            'thumbnail' => $video['snippet']['thumbnails']['medium']['url'],
+            'id' => $video_id,
+            'title' => $snippet['title'] ?? 'Untitled Video',
+            'description' => $snippet['description'] ?? 'No description available.',
+            'publishedAt' => $snippet['publishedAt'] ?? '',
+            'thumbnail' => $thumbnails,
         ];
     }, $data['items'] ?? []);
 
+    // Remove null entries caused by invalid data
+    $videos = array_filter($videos);
+
+    if (empty($videos)) {
+        error_log('No videos found or invalid API response.');
+        return [];
+    }
+
     // Cache the result for 1 hour (3600 seconds)
-    set_transient($cache_key, $videos, 3600);
+    set_transient($cache_key, $videos, HOUR_IN_SECONDS);
 
     return $videos;
 }
+
 
 
 add_action('rest_api_init', function () {
