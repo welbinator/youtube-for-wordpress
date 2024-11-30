@@ -17,49 +17,58 @@ document.addEventListener("DOMContentLoaded", () => {
     const cache = {};
 
     // Function to fetch videos
-    async function fetchVideos(container, searchQuery = '', playlistId = '') {
-        if (!container) {
-            console.error('Invalid container element.');
-            return [];
-        }
-    
-        const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
-        const layout = container.getAttribute('data-layout') || 'grid';
-        const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
-        const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
-    
-        if (cache[cacheKey]) return cache[cacheKey];
-    
-        let apiUrl;
-    
-        if (playlistId) {
-            // Fetch videos from the playlist
-            apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
-        } else {
-            // Fetch videos from the channel and order them by date
-            apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&order=date&key=${YT_FOR_WP.apiKey}`;
-        }
-    
-        if (searchQuery) {
-            apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
-        }
-    
-        try {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-    
-            if (data.error) {
-                console.error('YouTube API Error:', data.error);
-                return [];
-            }
-    
-            cache[cacheKey] = data.items || [];
-            return cache[cacheKey];
-        } catch (error) {
-            console.error('Error fetching videos:', error);
-            return [];
-        }
+    // Function to fetch videos
+async function fetchVideos(container, searchQuery = '', playlistId = '') {
+    if (!container) {
+        console.error('Invalid container element.');
+        return [];
     }
+
+    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
+    const layout = container.getAttribute('data-layout') || 'grid';
+    const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
+    const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
+
+    if (cache[cacheKey]) return cache[cacheKey];
+
+    let apiUrl;
+
+    if (playlistId) {
+        // Fetch videos from the playlist
+        apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
+    } else {
+        // Fetch videos from the channel and order them by date
+        apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&order=date&key=${YT_FOR_WP.apiKey}`;
+    }
+
+    if (searchQuery) {
+        apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
+    }
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('YouTube API Error:', data.error);
+            return [];
+        }
+
+        // Sort videos explicitly by publishedAt in reverse chronological order
+        const sortedVideos = (data.items || []).sort((a, b) => {
+            const dateA = new Date(a.snippet.publishedAt);
+            const dateB = new Date(b.snippet.publishedAt);
+            return dateB - dateA; // Descending order
+        });
+
+        cache[cacheKey] = sortedVideos;
+        return sortedVideos;
+    } catch (error) {
+        console.error('Error fetching videos:', error);
+        return [];
+    }
+}
+
     
 
     // Function to render videos
