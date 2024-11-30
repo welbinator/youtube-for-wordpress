@@ -17,78 +17,96 @@ document.addEventListener("DOMContentLoaded", () => {
     const cache = {};
 
     // Function to fetch videos
-    // Function to fetch videos
-async function fetchVideos(container, searchQuery = '', playlistId = '') {
-    if (!container) {
-        console.error('Invalid container element.');
-        return [];
-    }
-
-    const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
-    const layout = container.getAttribute('data-layout') || 'grid';
-    const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
-    const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
-
-    if (cache[cacheKey]) return cache[cacheKey];
-
-    let apiUrl;
-
-    if (playlistId) {
-        // Fetch videos from the playlist
-        apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
-    } else {
-        // Fetch videos from the channel and order them by date
-        apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&order=date&key=${YT_FOR_WP.apiKey}`;
-    }
-
-    if (searchQuery) {
-        apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
-    }
-
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (data.error) {
-            console.error('YouTube API Error:', data.error);
+    async function fetchVideos(container, searchQuery = '', playlistId = '') {
+        if (!container) {
+            console.error('Invalid container element.');
             return [];
         }
-
-        // Sort videos explicitly by publishedAt in reverse chronological order
-        const sortedVideos = (data.items || []).sort((a, b) => {
-            const dateA = new Date(a.snippet.publishedAt);
-            const dateB = new Date(b.snippet.publishedAt);
-            return dateB - dateA; // Descending order
-        });
-
-        cache[cacheKey] = sortedVideos;
-        return sortedVideos;
-    } catch (error) {
-        console.error('Error fetching videos:', error);
-        return [];
-    }
-}
-
     
-
+        const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
+        const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
+        const cacheKey = `${container.id}-${channelId}-${maxVideos}-${searchQuery}-${playlistId}`;
+    
+        // Check if the data is already cached
+        if (cache[cacheKey]) {
+            
+            return cache[cacheKey];
+        }
+    
+        let apiUrl;
+    
+        // Construct the API URL based on whether a playlistId is provided
+        if (playlistId) {
+            apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
+        } else {
+            apiUrl = `${YT_FOR_WP.restUrl}videos?channelId=${channelId}&maxResults=${maxVideos}`;
+            if (searchQuery) {
+                apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
+            }
+        }
+    
+            
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'X-WP-Nonce': YT_FOR_WP.nonce, // Include nonce for REST API
+                },
+            });
+    
+            const data = await response.json();
+    
+            if (data.error || data.code) {
+                console.error('YouTube API or REST API Error:', data.error || data.message);
+                return [];
+            }
+    
+            // Map API response to the expected structure for rendering
+            const videos = (data || []).map((video) => ({
+                id: video.id,
+                title: video.title || video.snippet?.title || 'Untitled Video',
+                description: video.description || video.snippet?.description || 'No description available.',
+                thumbnail: video.thumbnail || video.snippet?.thumbnails?.high?.url,
+                publishedAt: video.publishedAt || video.snippet?.publishedAt,
+            }));
+        
+            // Cache the processed videos for subsequent calls
+            cache[cacheKey] = videos;
+    
+            return videos;
+        } catch (error) {
+            console.error('Error fetching videos:', error);
+            return [];
+        }
+    }
+    
+   
     // Function to render videos
     function renderVideos(container, videos, layout) {
         if (!container) {
             console.error('Invalid container element.');
             return;
         }
-
+    
+        
+    
+        if (!videos || videos.length === 0) {
+            console.warn('No videos to render.');
+            container.innerHTML = '<p>No videos available to display.</p>';
+            return;
+        }
+    
         // Clear any existing swiper initialization flag
         container.removeAttribute('data-swiper-initialized');
-
+    
+        // Remove existing video container if it exists
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
             existingVideoContainer.remove();
         }
-
+    
         const videoContainer = document.createElement("div");
         videoContainer.classList.add("video-container");
-
+    
         if (layout === "grid") {
             videoContainer.classList.add("youtube-feed-grid");
         } else if (layout === "list") {
@@ -102,15 +120,15 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
                             (video) => `
                             <div class="swiper-slide">
                                 <iframe
-                                    src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
-                                    title="${video.snippet.title}"
+                                    src="https://www.youtube.com/embed/${video.id}?vq=hd720"
+                                    title="${video.title}"
                                     class="video-iframe"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowfullscreen
                                 ></iframe>
                                 <div class="video-info">
-                                    <h2 class="video-title">${video.snippet.title}</h2>
-                                    <p class="video-description">${video.snippet.description}</p>
+                                    <h2 class="video-title">${video.title}</h2>
+                                    <p class="video-description">${video.description}</p>
                                 </div>
                             </div>
                         `
@@ -121,9 +139,9 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
-
+    
             container.appendChild(videoContainer);
-
+    
             // Initialize Swiper with proper configuration
             const swiperInstance = new Swiper(videoContainer, {
                 modules: [Navigation, Pagination],
@@ -144,18 +162,18 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
                     1024: { slidesPerView: 3, spaceBetween: 30 },
                 },
                 on: {
-                    init: function() {
+                    init: function () {
                         console.log(`Swiper initialized for container: #${container.id}`);
-                    }
-                }
+                    },
+                },
             });
-
+    
             // Set initialization flag after successful initialization
             container.setAttribute('data-swiper-initialized', 'true');
-
+    
             return;
         }
-
+    
         // Non-carousel layouts
         container.appendChild(videoContainer);
         videos.forEach((video) => {
@@ -163,31 +181,29 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
             videoElement.classList.add(
                 layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item"
             );
-
-            const title = video.snippet.title;
-            const description = video.snippet.description;
-            const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
-            const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-
+    
+            const videoUrl = `https://www.youtube.com/embed/${video.id}`;
             videoElement.innerHTML = `
                 <div class="video-iframe-wrapper">
                     <iframe
                         src="${videoUrl}"
-                        title="${title}"
+                        title="${video.title}"
                         class="video-iframe"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen
                     ></iframe>
                 </div>
                 <div class="video-info">
-                    <h2 class="video-title">${title}</h2>
-                    <p class="video-description">${description}</p>
+                    <h2 class="video-title">${video.title}</h2>
+                    <p class="video-description">${video.description}</p>
                 </div>
             `;
-
+    
             videoContainer.appendChild(videoElement);
         });
     }
+    
+    
 
     // Export fetchVideos and renderVideos to the global YT_FOR_WP object
         if (!window.YT_FOR_WP) {
@@ -208,6 +224,7 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
         processedContainers.add(container.id);
         const layout = container.getAttribute('data-layout') || 'grid';
         const videos = await fetchVideos(container);
+        
         renderVideos(container, videos, layout);
 
         // Hook for Pro-only features
