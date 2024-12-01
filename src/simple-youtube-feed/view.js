@@ -69,8 +69,6 @@ async function fetchVideos(container, searchQuery = '', playlistId = '') {
     }
 }
 
-    
-
     // Function to render videos
     function renderVideos(container, videos, layout) {
         if (!container) {
