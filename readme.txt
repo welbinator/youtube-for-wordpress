@@ -3,7 +3,7 @@
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
 Requires at least: 5.8  
-Stable tag: 1.0.7  
+Stable tag: 1.0.8  
 Tested up to: 6.7  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
@@ -37,6 +37,9 @@ Visit our website for more information on how to get started: [Getting Started G
 3. Carousel layout with playlist filtering.
 
 == Changelog ==
+
+= 1.0.8 =
+*Fixed: Filtering was broken
 
 = 1.0.7 =
 * Improved: Using the publishedAt date for the order of the videos so the order matches what you see in the channel on youtube.com
