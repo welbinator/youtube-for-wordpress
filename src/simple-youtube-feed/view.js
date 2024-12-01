@@ -22,38 +22,53 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Invalid container element.');
             return [];
         }
-
+    
         const channelId = container.getAttribute('data-channel-id') || YT_FOR_WP.channelId;
         const layout = container.getAttribute('data-layout') || 'grid';
         const maxVideos = parseInt(container.getAttribute('data-max-videos'), 10) || 10;
         const cacheKey = `${container.id}-${channelId}-${layout}-${maxVideos}-${searchQuery}-${playlistId}`;
-
+    
         if (cache[cacheKey]) return cache[cacheKey];
-
-        let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&key=${YT_FOR_WP.apiKey}`;
+    
+        let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&channelId=${channelId}&maxResults=${maxVideos}&order=date&key=${YT_FOR_WP.apiKey}`;
         if (playlistId) {
             apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxVideos}&playlistId=${playlistId}&key=${YT_FOR_WP.apiKey}`;
         }
         if (searchQuery) {
             apiUrl += `&q=${encodeURIComponent(searchQuery)}`;
         }
-
+    
+        console.log('Fetching videos from API:', apiUrl);
+    
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
-
+    
             if (data.error) {
                 console.error('YouTube API Error:', data.error);
                 return [];
             }
-
-            cache[cacheKey] = data.items || [];
-            return cache[cacheKey];
+    
+            const videos = (data.items || []).map((video) => ({
+                id: video.id?.videoId || video.snippet?.resourceId?.videoId || '',
+                title: video.snippet?.title || 'Untitled Video',
+                description: video.snippet?.description || 'No description available.',
+                thumbnail: video.snippet?.thumbnails?.high?.url || '',
+                publishedAt: video.snippet?.publishedAt || '',
+            }));
+    
+            // Sort videos by published date (most recent first)
+            videos.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    
+            cache[cacheKey] = videos;
+            return videos;
         } catch (error) {
             console.error('Error fetching videos:', error);
             return [];
         }
     }
+    
+    
 
     // Function to render videos
     function renderVideos(container, videos, layout) {
@@ -61,18 +76,24 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Invalid container element.');
             return;
         }
-
+    
+        if (!videos || videos.length === 0) {
+            console.warn('No videos to render.');
+            container.innerHTML = '<p>No videos available to display.</p>';
+            return;
+        }
+    
         // Clear any existing swiper initialization flag
         container.removeAttribute('data-swiper-initialized');
-
+    
         const existingVideoContainer = container.querySelector(".video-container");
         if (existingVideoContainer) {
             existingVideoContainer.remove();
         }
-
+    
         const videoContainer = document.createElement("div");
         videoContainer.classList.add("video-container");
-
+    
         if (layout === "grid") {
             videoContainer.classList.add("youtube-feed-grid");
         } else if (layout === "list") {
@@ -82,19 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
                     ${videos
+                        .filter((video) => video.id) // Only include valid videos
                         .map(
                             (video) => `
                             <div class="swiper-slide">
                                 <iframe
-                                    src="https://www.youtube.com/embed/${video.id.videoId || video.snippet.resourceId?.videoId}?vq=hd720"
-                                    title="${video.snippet.title}"
+                                    src="https://www.youtube.com/embed/${video.id}?vq=hd720"
+                                    title="${video.title}"
                                     class="video-iframe"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowfullscreen
                                 ></iframe>
                                 <div class="video-info">
-                                    <h2 class="video-title">${video.snippet.title}</h2>
-                                    <p class="video-description">${video.snippet.description}</p>
+                                    <h2 class="video-title">${video.title}</h2>
+                                    <p class="video-description">${video.description}</p>
                                 </div>
                             </div>
                         `
@@ -105,11 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="swiper-button-next"></div>
                 <div class="swiper-button-prev"></div>
             `;
-
+    
             container.appendChild(videoContainer);
-
-            // Initialize Swiper with proper configuration
-            const swiperInstance = new Swiper(videoContainer, {
+    
+            new Swiper(videoContainer, {
                 modules: [Navigation, Pagination],
                 slidesPerView: 1,
                 spaceBetween: 10,
@@ -122,56 +143,40 @@ document.addEventListener("DOMContentLoaded", () => {
                     clickable: true,
                 },
                 loop: true,
-                breakpoints: {
-                    640: { slidesPerView: 1, spaceBetween: 10 },
-                    768: { slidesPerView: 2, spaceBetween: 20 },
-                    1024: { slidesPerView: 3, spaceBetween: 30 },
-                },
-                on: {
-                    init: function() {
-                        console.log(`Swiper initialized for container: #${container.id}`);
-                    }
-                }
             });
-
-            // Set initialization flag after successful initialization
-            container.setAttribute('data-swiper-initialized', 'true');
-
+    
             return;
         }
-
+    
         // Non-carousel layouts
         container.appendChild(videoContainer);
-        videos.forEach((video) => {
+        videos.filter((video) => video.id).forEach((video) => {
             const videoElement = document.createElement("div");
             videoElement.classList.add(
                 layout === "grid" ? "youtube-video-grid-item" : "youtube-video-list-item"
             );
-
-            const title = video.snippet.title;
-            const description = video.snippet.description;
-            const videoId = video.id.videoId || video.snippet.resourceId?.videoId;
-            const videoUrl = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-
+    
+            const videoUrl = `https://www.youtube.com/embed/${video.id}`;
             videoElement.innerHTML = `
                 <div class="video-iframe-wrapper">
                     <iframe
                         src="${videoUrl}"
-                        title="${title}"
+                        title="${video.title}"
                         class="video-iframe"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen
                     ></iframe>
                 </div>
                 <div class="video-info">
-                    <h2 class="video-title">${title}</h2>
-                    <p class="video-description">${description}</p>
+                    <h2 class="video-title">${video.title}</h2>
+                    <p class="video-description">${video.description}</p>
                 </div>
             `;
-
+    
             videoContainer.appendChild(videoElement);
         });
     }
+    
 
     // Export fetchVideos and renderVideos to the global YT_FOR_WP object
         if (!window.YT_FOR_WP) {
