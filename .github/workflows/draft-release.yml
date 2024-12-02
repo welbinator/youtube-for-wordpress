@@ -1,4 +1,4 @@
-name: Create Release for YouTube Free
+name: Create Draft Release for YouTube Free
 
 on:
   workflow_dispatch:
