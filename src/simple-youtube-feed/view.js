@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
             new Swiper(videoContainer, {
                 modules: [Navigation, Pagination],
-                slidesPerView: 1,
+                slidesPerView: 3,
                 spaceBetween: 10,
                 navigation: {
                     nextEl: '.swiper-button-next',
