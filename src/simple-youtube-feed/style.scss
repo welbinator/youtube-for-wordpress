@@ -1,3 +1,47 @@
+@media (min-width: 640px) { 
+
+    .youtube-search-bar {
+        width: 100%!important;
+    }
+    
+   
+    .youtube-video-list-item {
+        flex-direction: row;
+
+		.video-iframe-wrapper {
+			width: 30%;
+			padding-top: 0; 
+			min-width: 325px;
+		}
+    }
+    .youtube-video-grid-item {
+
+        .video-iframe-wrapper {
+            min-width: 325px;
+        }
+    }
+    .youtube-search-container {
+        width: 50%;
+    }
+    .youtube-playlist-dropdown {
+        width: 50%;
+    }
+
+}
+@media (min-width: 1250px) {
+    .youtube-filter-container {
+        flex-direction: row!important;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex: 1; 
+        width: 100%;
+        max-width: 1500px;
+        margin-bottom: 20px;
+    }
+}
+
+
 /* Main Container */
 .youtube-filter-container {
     display: flex;
@@ -5,28 +49,25 @@
     gap: 20px;
     align-items: center;
     padding-block: 20px;
+    margin-inline: 10px;
 }
-@media (min-width: 640px) { 
-    .youtube-filter-container {
-        flex-direction: row;
-    }
-    .youtube-playlist-dropdown {
-        // max-width: 200px;
-    }
-    .youtube-search-bar {
-        width: 100%;
-        max-width: 350px;
-    }
+button.youtube-search-button {
+    width: 100%;
+    max-width: 200px;
 }
+.youtube-search-bar {
+    margin: 0!important;
+    width: 100%!important;
+}
+
 .youtube-search-container {
     display: flex;
-    gap: 10px;
-    align-items: center;
-    flex: 1; 
     width: 100%;
+    gap: 10px;
 }
 .youtube-playlist-dropdown {
-    width: 100%
+    width: 100%;
+    margin: 0;
 }
 
 #youtube-feed-container {
@@ -44,6 +85,11 @@
 }
 
 /* Grid Layout */
+.video-container {
+    margin-inline: 10px;
+    width: 100%;
+    max-width: 1500px;
+}
 .youtube-feed-grid {
     display: grid;
     gap: 1.5rem;
@@ -123,9 +169,10 @@
 
 
 .video-iframe {
-    width: 100%; /* Full width within the wrapper */
-    height: 100%; /* Full height within the wrapper */
-    border: 0; /* Remove any default border */
+    width: 100%;
+    height: 100%;
+    border: 0;
+    aspect-ratio: 16 / 9;
 }
 /* Container */
 .youtube-feed-container {
@@ -165,24 +212,6 @@
 	}
 }
 
-/* Adjust for larger screens (responsive behavior similar to 'sm:flex-row') */
-@media (min-width: 640px) { 
-    .youtube-video-list-item {
-        flex-direction: row;
-
-		.video-iframe-wrapper {
-			width: 30%;
-			padding-top: 0; 
-			min-width: 325px;
-		}
-    }
-    .youtube-video-grid-item {
-
-        .video-iframe-wrapper {
-            min-width: 325px;
-        }
-    }
-}
 
 /* Video details */
 .video-details {
