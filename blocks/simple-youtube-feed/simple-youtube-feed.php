@@ -55,8 +55,8 @@ function render_youtube_feed_block($attributes, $content) {
     ob_start();
     ?>
     <div 
-        <?php echo esc_attr(get_block_wrapper_attributes()); ?>
-         id="<?php echo esc_attr($unique_id); ?>"
+        <?php echo get_block_wrapper_attributes(); ?>
+        id="<?php echo esc_attr($unique_id); ?>"
         data-layout="<?php echo esc_attr($attributes['layout'] ?? 'grid'); ?>"
         data-max-videos="<?php echo esc_attr($attributes['maxVideos'] ?? 5); ?>"
         data-selected-playlist="<?php echo esc_attr($attributes['selectedPlaylist'] ?? ''); ?>"
