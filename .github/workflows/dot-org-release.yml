@@ -30,7 +30,7 @@ jobs:
 
     - name: Zip the folder
       run: |
-        zip -r yt-for-wp-${{ github.event.inputs.tag }}.zip yt-for-wp \
+        zip -r yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip yt-for-wp \
         -x "*.git/*" "*.github/*" \
         "yt-for-wp/package.json" \
         "yt-for-wp/package-lock.json" \
@@ -43,7 +43,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: yt-for-wp-${{ github.event.inputs.tag }}.zip
+        files: yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip
         tag_name: ${{ github.event.inputs.tag }}
         draft: ${{ github.event.inputs.is_draft == 'true' }}
       env:
