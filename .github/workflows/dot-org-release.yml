@@ -38,7 +38,7 @@ jobs:
         "yt-for-wp/node_modules/*" \
         "yt-for-wp/.gitignore" \
         "yt-for-wp/webpack.config.js" \
-        "github-update.php"
+        "yt-for-wp/github-update.php"
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
