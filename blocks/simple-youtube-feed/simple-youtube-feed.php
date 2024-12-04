@@ -55,7 +55,7 @@ function render_youtube_feed_block($attributes, $content) {
     ob_start();
     ?>
     <div 
-        <?php echo get_block_wrapper_attributes(); ?>
+        <?php echo esc_attr(get_block_wrapper_attributes()); ?>
         id="<?php echo esc_attr($unique_id); ?>"
         data-layout="<?php echo esc_attr($attributes['layout'] ?? 'grid'); ?>"
         data-max-videos="<?php echo esc_attr($attributes['maxVideos'] ?? 5); ?>"
@@ -111,7 +111,7 @@ function fetch_youtube_feed_videos($channel_id, $api_key, $max_results = 5) {
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
     if (isset($data['error'])) {
-        error_log('YouTube API Error: ' . json_encode($data['error']));
+        error_log('YouTube API Error: ' . wp_json_encode($data['error']));
         return [];
     }
 
@@ -168,9 +168,6 @@ add_action('rest_api_init', function () {
     }
 
     $videos = fetch_youtube_feed_videos($channel_id, $api_key, $max_results);
-
-    // Add debug log
-    error_log('Fetched videos: ' . print_r($videos, true));
 
     return rest_ensure_response($videos);
 },
