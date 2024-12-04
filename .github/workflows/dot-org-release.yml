@@ -40,12 +40,16 @@ jobs:
         "yt-for-wp/webpack.config.js" \
         "yt-for-wp/github-update.php"
 
-    - name: Create Release
+    - name: Create Draft Release For Dot Org
       uses: softprops/action-gh-release@v1
       with:
         files: yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip
         tag_name: ${{ github.event.inputs.tag }}
-        draft: ${{ github.event.inputs.is_draft == 'true' }}
+        name: Release for dot org - ${{ github.event.inputs.tag }}
+        body: |
+          This release is prepared for WordPress.org submission and excludes files meant for development.
+        draft: true
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
