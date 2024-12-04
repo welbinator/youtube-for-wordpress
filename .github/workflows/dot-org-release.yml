@@ -41,6 +41,7 @@ jobs:
         "yt-for-wp/github-update.php"
 
     - name: Create Separate Draft Release
+      id: create_release  # Assign an ID to reference outputs
       uses: actions/create-release@v1
       with:
         tag_name: dot-org-${{ github.event.inputs.tag }}
