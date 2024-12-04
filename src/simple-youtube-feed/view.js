@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
             new Swiper(videoContainer, {
                 modules: [Navigation, Pagination],
-                slidesPerView: 3,
+                slidesPerView: 1, // Default for screens wider than 640px
                 spaceBetween: 10,
                 navigation: {
                     nextEl: '.swiper-button-next',
@@ -143,7 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     clickable: true,
                 },
                 loop: true,
+                breakpoints: {
+                    640: { // For devices with a width of 640px or less
+                        slidesPerView: 3,
+                    },
+                },
             });
+            
     
             return;
         }
