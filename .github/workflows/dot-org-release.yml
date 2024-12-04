@@ -1,4 +1,4 @@
-name: Create Release for dot org repo
+name: Create Separate Draft Release for dot org repo
 
 on:
   workflow_dispatch:
@@ -40,18 +40,25 @@ jobs:
         "yt-for-wp/webpack.config.js" \
         "yt-for-wp/github-update.php"
 
-    - name: Create Draft Release For Dot Org
-      uses: softprops/action-gh-release@v1
+    - name: Create Separate Draft Release
+      uses: actions/create-release@v1
       with:
-        files: yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip
-        tag_name: ${{ github.event.inputs.tag }}
-        name: Release for dot org - ${{ github.event.inputs.tag }}
+        tag_name: dot-org-${{ github.event.inputs.tag }}
+        release_name: WordPress.org Release - ${{ github.event.inputs.tag }}
         body: |
           This release is prepared for WordPress.org submission and excludes files meant for development.
         draft: true
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip
+        asset_name: yt-for-wp-dot-org-${{ github.event.inputs.tag }}.zip
+        asset_content_type: application/zip
 
 permissions:
   contents: write
