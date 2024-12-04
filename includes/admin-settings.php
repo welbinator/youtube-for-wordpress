@@ -169,7 +169,7 @@ function register_settings() {
     // First, register the settings section
     add_settings_section(
         'yt_for_wp_main_section',
-        __('Main Settings', 'youtube-for-wordpress'),
+        __('Main Settings', 'yt-for-wp'),
         '__return_false',
         'yt-for-wp-settings'
     );
@@ -177,7 +177,7 @@ function register_settings() {
     // Register API Key field
     add_settings_field(
         'yt_for_wp_api_key',
-        __('YouTube API Key', 'youtube-for-wordpress'),
+        __('YouTube API Key', 'yt-for-wp'),
         function() {
             if (!current_user_can('manage_options')) {
                 return;
@@ -191,7 +191,7 @@ function register_settings() {
                 class="regular-text"
             />
             <p class="description">
-                <?php esc_html_e('Your YouTube API key will be stored securely using encryption.', 'youtube-for-wordpress'); ?>
+                <?php esc_html_e('Your YouTube API key will be stored securely using encryption.', 'yt-for-wp'); ?>
             </p>
             <?php
         },
@@ -202,7 +202,7 @@ function register_settings() {
     // Register Channel ID field
     add_settings_field(
         'yt_for_wp_channel_id',
-        __('YouTube Channel ID', 'youtube-for-wordpress'),
+        __('YouTube Channel ID', 'yt-for-wp'),
         function() {
             if (!current_user_can('manage_options')) {
                 return;
@@ -231,7 +231,7 @@ function register_settings() {
                     add_settings_error(
                         'yt_for_wp_api_key',
                         'invalid_permissions',
-                        __('You do not have permission to modify these settings.', 'youtube-for-wordpress'),
+                        __('You do not have permission to modify these settings.', 'yt-for-wp'),
                         'error'
                     );
                     return get_api_key(); // Return existing value
@@ -249,7 +249,7 @@ function register_settings() {
                     add_settings_error(
                         'yt_for_wp_api_key',
                         'encryption_failed',
-                        __('Failed to securely store the API key. Please try again.', 'youtube-for-wordpress'),
+                        __('Failed to securely store the API key. Please try again.', 'yt-for-wp'),
                         'error'
                     );
                 }
@@ -286,12 +286,12 @@ function sanitize_channel_id($input) {
 function render_settings_page() {
     if (!current_user_can('manage_options')) {
         wp_die(
-            esc_html__('You do not have sufficient permissions to access this page.', 'youtube-for-wordpress')
+            esc_html__('You do not have sufficient permissions to access this page.', 'yt-for-wp')
         );
     }
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e('YouTube for WordPress Settings', 'youtube-for-wordpress'); ?></h1>
+        <h1><?php esc_html_e('YouTube for WordPress Settings', 'yt-for-wp'); ?></h1>
         
         <?php
         // Show any error messages
@@ -300,7 +300,7 @@ function render_settings_page() {
         // Get and show API key status if we have one
         $api_key = get_api_key();
         $status_message = empty($api_key) ? 
-            __('Enter your YouTube API key here.', 'youtube-for-wordpress') : 
+            __('Enter your YouTube API key here.', 'yt-for-wp') : 
             validate_api_key($api_key);
         
         echo '<p id="api-key-status">' . esc_html($status_message) . '</p>';
@@ -322,7 +322,7 @@ function render_settings_page() {
  */
 function validate_api_key($api_key) {
     if (empty($api_key)) {
-        return __('API Key not set', 'youtube-for-wordpress');
+        return __('API Key not set', 'yt-for-wp');
     }
 
     $channel_id = get_option('yt_for_wp_channel_id');
@@ -356,7 +356,7 @@ function validate_api_key($api_key) {
 
     if (is_wp_error($response)) {
         error_log('YouTube API validation error: ' . $response->get_error_message());
-        return __('API Key validation failed', 'youtube-for-wordpress');
+        return __('API Key validation failed', 'yt-for-wp');
     }
 
     $body = wp_remote_retrieve_body($response);
@@ -369,27 +369,27 @@ function validate_api_key($api_key) {
         // Check for quota exceeded
         if (isset($data['error']['errors'][0]['reason']) && 
             $data['error']['errors'][0]['reason'] === 'quotaExceeded') {
-            return __('API quota exceeded. Key may still be valid.', 'youtube-for-wordpress');
+            return __('API quota exceeded. Key may still be valid.', 'yt-for-wp');
         }
         
         // Check for API key related errors
         if (isset($data['error']['errors'][0]['reason'])) {
             $reason = $data['error']['errors'][0]['reason'];
             if (in_array($reason, ['badRequest', 'invalid', 'authError'])) {
-                return __('API Key Invalid', 'youtube-for-wordpress');
+                return __('API Key Invalid', 'yt-for-wp');
             }
             if ($reason === 'API_KEY_HTTP_REFERRER_BLOCKED') {
-                return __('API Key is valid but restricted to specific domains. Please check your API key settings in Google Cloud Console.', 'youtube-for-wordpress');
+                return __('API Key is valid but restricted to specific domains. Please check your API key settings in Google Cloud Console.', 'yt-for-wp');
             }
         }
         
         return sprintf(
             // Translators: %s is the validation error message from the API.
-            __('API Error: %s', 'youtube-for-wordpress'),
-            $data['error']['message'] ?? __('Unknown error', 'youtube-for-wordpress')
+            __('API Error: %s', 'yt-for-wp'),
+            $data['error']['message'] ?? __('Unknown error', 'yt-for-wp')
         );
     }
 
     // If we got here, the key is valid
-    return __('API Key Valid', 'youtube-for-wordpress');
+    return __('API Key Valid', 'yt-for-wp');
 }
