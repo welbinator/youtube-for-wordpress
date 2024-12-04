@@ -31,6 +31,35 @@ Ready to take it to the next level? [YouTube for WP Pro](https://youtubeforwordp
 
 Visit our website for more information on how to get started: [Getting Started Guide](https://youtubeforwordpress.com/kb_article/getting-started/)
 
+== 🔗 Source Code ==
+
+The source code for this plugin, including build tools and development instructions, is publicly available on GitHub:  
+[GitHub Repository](https://github.com/welbinator/youtube-for-wordpress)  
+
+To rebuild the plugin from source, follow the instructions in the repository's README file.
+
+== 🌐 External Services ==
+
+This plugin uses the YouTube Data API to fetch video information, including playlists and channel uploads, to display them on your WordPress site.
+
+1. **What the service is and what it is used for**  
+   The plugin connects to the YouTube Data API to fetch video data such as titles, descriptions, thumbnails, and URLs. This data is used to display YouTube video feeds, playlists, or live videos in the plugin’s blocks and shortcodes.
+
+2. **What data is sent and when**  
+   - The plugin sends the following data to the YouTube API:
+     - The YouTube Channel ID or Playlist ID entered by the user.
+     - The API key provided in the plugin settings.
+     - Search queries or filters (if applicable, based on plugin features).
+   - These requests are sent when:
+     - A user visits a page where the plugin is active.
+     - The admin configures settings in the WordPress dashboard.
+
+3. **Links to terms of service and privacy policy**  
+   - [YouTube API Terms of Service](https://developers.google.com/youtube/terms/api-services-terms-of-service)  
+   - [YouTube Privacy Policy](https://policies.google.com/privacy)
+
+Users must obtain their own YouTube API key and agree to YouTube’s terms of service to use the plugin.
+
 == Screenshots ==
 1. Grid layout of a YouTube channel feed.  
 2. List layout of recent uploads.  
