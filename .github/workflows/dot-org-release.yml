@@ -45,6 +45,7 @@ jobs:
       with:
         files: yt-for-wp-${{ github.event.inputs.tag }}.zip
         tag_name: ${{ github.event.inputs.tag }}
+        draft: ${{ github.event.inputs.is_draft == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
