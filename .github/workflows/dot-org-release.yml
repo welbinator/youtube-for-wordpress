@@ -6,6 +6,10 @@ on:
       tag:
         description: 'Release Tag'
         required: true
+      is_draft:
+        description: 'Create as Draft Release (true/false)'
+        required: false
+        default: 'true'
 
 jobs:
   build:
