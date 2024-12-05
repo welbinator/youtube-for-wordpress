@@ -64,6 +64,7 @@ export default function Edit({ attributes, setAttributes }) {
                             { label: __('Grid View', 'simple-youtube-feed'), value: 'grid' },
                             { label: __('List View', 'simple-youtube-feed'), value: 'list' },
                             { label: __('Carousel', 'simple-youtube-feed'), value: 'carousel' },
+                            { label: __('Gallery View', 'simple-youtube-feed'), value: 'gallery' },
                         ]}
                         onChange={(newLayout) => setAttributes({ layout: newLayout })}
                     />
