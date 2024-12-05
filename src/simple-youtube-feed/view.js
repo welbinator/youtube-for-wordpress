@@ -150,9 +150,97 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
             });
             
-    
+            return;
+        } else if (layout === 'gallery') {
+            const featuredVideo = videos[0];
+            const remainingVideos = videos.slice(1);
+        
+            videoContainer.innerHTML = `
+                <div class="gallery-featured-video">
+                    <iframe
+                        src="https://www.youtube.com/embed/${featuredVideo.id}?vq=hd720"
+                        title="${featuredVideo.title}"
+                        class="video-iframe featured-video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                    ></iframe>
+                    <div class="video-info">
+                        <h2 class="video-title">${featuredVideo.title}</h2>
+                        <p class="video-description">${featuredVideo.description}</p>
+                    </div>
+                </div>
+                <div class="gallery-carousel swiper">
+                    <div class="swiper-wrapper">
+                        ${remainingVideos
+                            .filter((video) => video.id)
+                            .map(
+                                (video) => `
+                                    <div class="swiper-slide">
+                                        <img
+                                            src="${video.thumbnail}"
+                                            alt="${video.title}"
+                                            class="gallery-carousel-thumbnail"
+                                            data-video-id="${video.id}"
+                                        />
+                                    </div>
+                                `
+                            )
+                            .join('')}
+                    </div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+            `;
+        
+            container.appendChild(videoContainer);
+        
+            const swiper = new Swiper('.gallery-carousel', {
+                modules: [Navigation, Pagination],
+                slidesPerView: 3,
+                spaceBetween: 10,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+            });
+        
+            // Handle thumbnail click
+            
+const thumbnails = videoContainer.querySelectorAll('.gallery-carousel-thumbnail');
+thumbnails.forEach((thumbnail) => {
+    thumbnail.addEventListener('click', (e) => {
+        const videoId = e.target.getAttribute('data-video-id');
+        const videoTitle = e.target.getAttribute('alt'); // Using the alt attribute for the title
+        const videoDescription = videos.find(video => video.id === videoId)?.description || 'No description available.';
+
+        // Update the featured video iframe
+        const featuredIframe = videoContainer.querySelector('.featured-video');
+        featuredIframe.src = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
+
+        // Update the featured video title
+        const featuredTitle = videoContainer.querySelector('.video-title');
+        if (featuredTitle) {
+            featuredTitle.textContent = videoTitle;
+        }
+
+        // Update the featured video description
+        const featuredDescription = videoContainer.querySelector('.video-description');
+        if (featuredDescription) {
+            featuredDescription.textContent = videoDescription;
+        }
+    });
+});
+
+
+        
             return;
         }
+        
     
         // Non-carousel layouts
         container.appendChild(videoContainer);
