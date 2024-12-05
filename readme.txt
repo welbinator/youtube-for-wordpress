@@ -3,7 +3,7 @@
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
 Requires at least: 5.8  
-Stable tag: 1.1.1  
+Stable tag: 1.1.2  
 Tested up to: 6.7  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
@@ -66,6 +66,9 @@ Users must obtain their own YouTube API key and agree to YouTube’s terms of se
 3. Carousel layout with playlist filtering.
 
 == Changelog ==
+
+= 1.1.2 =
+*New Fetaure: Added Gallery View to the Simple Feed block
 
 = 1.1.1 =
 *Improved: fixed a few things for the dot org review team
