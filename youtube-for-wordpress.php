@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: YT for WP
- * Plugin URI: https://youtubeforwp.com
+ * Plugin URI: https://youtubeforwordpress.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
  * Version: 1.1.2
  * Requires at least: 5.8
