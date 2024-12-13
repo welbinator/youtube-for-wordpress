@@ -17,7 +17,7 @@ class API_Key_Handler {
         try {
             return base64_encode(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES));
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Failed to generate encryption key: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Failed to generate encryption key: ' . $e->getMessage());
             return false;
         }
     }
@@ -51,14 +51,14 @@ class API_Key_Handler {
         }
 
         if (!function_exists('sodium_crypto_secretbox')) {
-            error_log('YouTube for WP: Sodium encryption not available');
+            error_log('Toolkit Integration for Youtube: Sodium encryption not available');
             return false;
         }
 
         try {
             $key = $this->get_encryption_key();
             if ($key === false) {
-                error_log('YouTube for WP: Failed to get encryption key');
+                error_log('Toolkit Integration for Youtube: Failed to get encryption key');
                 return false;
             }
 
@@ -67,7 +67,7 @@ class API_Key_Handler {
             
             return base64_encode($nonce . $encrypted);
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Encryption error: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Encryption error: ' . $e->getMessage());
             return false;
         }
     }
@@ -81,20 +81,20 @@ class API_Key_Handler {
         }
 
         if (!function_exists('sodium_crypto_secretbox_open')) {
-            error_log('YouTube for WP: Sodium decryption not available');
+            error_log('Toolkit Integration for Youtube: Sodium decryption not available');
             return false;
         }
 
         try {
             $key = $this->get_encryption_key();
             if ($key === false) {
-                error_log('YouTube for WP: Failed to get decryption key');
+                error_log('Toolkit Integration for Youtube: Failed to get decryption key');
                 return false;
             }
 
             $decoded = base64_decode($encrypted_api_key);
             if ($decoded === false) {
-                error_log('YouTube for WP: Failed to decode encrypted data');
+                error_log('Toolkit Integration for Youtube: Failed to decode encrypted data');
                 return false;
             }
 
@@ -103,13 +103,13 @@ class API_Key_Handler {
 
             $decrypted = sodium_crypto_secretbox_open($encrypted, $nonce, $key);
             if ($decrypted === false) {
-                error_log('YouTube for WP: Decryption failed');
+                error_log('Toolkit Integration for Youtube: Decryption failed');
                 return false;
             }
 
             return $decrypted;
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Decryption error: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Decryption error: ' . $e->getMessage());
             return false;
         }
     }
@@ -291,7 +291,7 @@ function render_settings_page() {
     }
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e('YouTube for WordPress Settings', 'yt-for-wp'); ?></h1>
+        <h1><?php esc_html_e('Toolkit Integration for Youtube Settings', 'yt-for-wp'); ?></h1>
         
         <?php
         // Show any error messages
