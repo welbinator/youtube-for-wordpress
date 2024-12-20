@@ -1,4 +1,4 @@
-=== YT for WP ===
+=== Toolkit Integration for Youtube ===
 
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
@@ -8,11 +8,11 @@ Tested up to: 6.7
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
-YouTube for WP brings the power of YouTube to your WordPress site. Display customizable video feeds and playlists directly on your website with ease.
+Toolkit Integration for Youtube brings the power of YouTube to your WordPress site. Display customizable video feeds and playlists directly on your website with ease.
 
 == Description ==
 
-Transform your WordPress site with [YouTube for WP](https://youtubeforwordpress.com), the perfect plugin for embedding dynamic YouTube content. Whether you’re a creator, a business, or a blogger, YouTube for WP makes it easy to display engaging video feeds and playlists tailored to your audience.
+Transform your WordPress site with [Toolkit Integration for Youtube](https://ytforwp.com), the perfect plugin for embedding dynamic YouTube content. Whether you’re a creator, a business, or a blogger, Toolkit Integration for Youtube makes it easy to display engaging video feeds and playlists tailored to your audience.
 
 Simple shortcodes and intuitive Gutenberg blocks make adding YouTube content effortless. Set up a responsive video feed, customize layouts, and showcase your favorite playlists in just minutes!
 
@@ -21,15 +21,15 @@ Key features:
 - Choose from grid, list, or carousel layouts.  
 - Add dynamic filtering options for playlists and keywords (Pro version).    
 
-YouTube for WP is ideal for anyone looking to keep their audience engaged with high-quality video content directly on their WordPress site.
+Toolkit Integration for Youtube is ideal for anyone looking to keep their audience engaged with high-quality video content directly on their WordPress site.
 
 = ✨ Unlock Pro Features =
 
-Ready to take it to the next level? [YouTube for WP Pro](https://youtubeforwordpress.com/#pricing) includes advanced features like keyword filtering, playlist filtering, and premium support to give your videos even more visibility.
+Ready to take it to the next level? [Toolkit Integration for Youtube Pro](https://ytforwp.com/#pricing) includes advanced features like keyword filtering, playlist filtering, and premium support to give your videos even more visibility.
 
 == 📃 Documentation ==
 
-Visit our website for more information on how to get started: [Getting Started Guide](https://youtubeforwordpress.com/kb_article/getting-started/)
+Visit our website for more information on how to get started: [Getting Started Guide](https://ytforwp.com/kb_article/getting-started/)
 
 == 🔗 Source Code ==
 
