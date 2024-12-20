@@ -162,7 +162,7 @@ add_action('rest_api_init', function () {
     if (!$channel_id || !$api_key) {
         return new \WP_Error(
             'missing_parameters',
-            __('Channel ID or API key is missing.', 'toolkit-integration-for-youtube'),
+            __('Channel ID or API key is missing.', 'yt-for-wp'),
             ['status' => 400]
         );
     }

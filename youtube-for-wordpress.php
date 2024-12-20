@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Toolkit Integration for Youtube
- * Plugin URI: https://ytforwp.com
+ * Plugin Name: YT for WP
+ * Plugin URI: https://youtubeforwp.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
- * Version: 1.1.3
+ * Version: 1.1.2
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: James Welbes
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('YOUTUBE_FOR_WP_VERSION', '1.1.3');
+define('YOUTUBE_FOR_WP_VERSION', '1.1.2');
 define('YT_FOR_WP_PATH', plugin_dir_path(__FILE__));
 define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
@@ -44,7 +44,7 @@ function activation_check() {
     if (version_compare(PHP_VERSION, YT_FOR_WP_MIN_PHP_VERSION, '<')) {
         $errors[] = sprintf(
             // Translators: %s is the minimum required PHP version.
-            esc_html__('Toolkit Integration for Youtube requires PHP version %s or higher.', 'toolkit-integration-for-youtube'),
+            esc_html__('YouTube for WordPress requires PHP version %s or higher.', 'yt-for-wp'),
             esc_html(YT_FOR_WP_MIN_PHP_VERSION)
         );
     }
@@ -52,7 +52,7 @@ function activation_check() {
     if (version_compare($GLOBALS['wp_version'], YT_FOR_WP_MIN_WP_VERSION, '<')) {
         $errors[] = sprintf(
             // Translators: %s is the minimum required WordPress version.
-            esc_html__('Toolkit Integration for Youtube requires WordPress version %s or higher.', 'toolkit-integration-for-youtube'),
+            esc_html__('YouTube for WordPress requires WordPress version %s or higher.', 'yt-for-wp'),
             esc_html(YT_FOR_WP_MIN_WP_VERSION)
         );
     }
@@ -71,7 +71,7 @@ register_activation_hook(__FILE__, __NAMESPACE__ . '\\activation_check');
  * Load text domain for internationalization
  */
 function load_textdomain() {
-    load_plugin_textdomain('toolkit-integration-for-youtube', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    load_plugin_textdomain('yt-for-wp', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 add_action('init', __NAMESPACE__ . '\\load_textdomain');
 
@@ -90,8 +90,8 @@ if (file_exists(YT_FOR_WP_PATH . 'github-update.php')) {
 // Register settings page.
 function add_admin_menu() {
     add_menu_page(
-        __('YT for WP', 'toolkit-integration-for-youtube'),
-        __('YT for WP', 'toolkit-integration-for-youtube'),
+        __('YT for WP', 'yt-for-wp'),
+        __('YT for WP', 'yt-for-wp'),
         'manage_options',
         'youtube-for-wordpress-settings',
         __NAMESPACE__ . '\\Admin\\Settings\\render_settings_page',

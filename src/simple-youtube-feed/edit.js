@@ -18,7 +18,7 @@ export default function Edit({ attributes, setAttributes }) {
         async function fetchPlaylists() {
             const currentChannelId = YT_FOR_WP.channelId;
             if (!currentChannelId || !YT_FOR_WP.apiKey) {
-                setPlaylists([{ label: __('Please configure YouTube API settings', 'toolkit-integration-for-youtube'), value: '' }]);
+                setPlaylists([{ label: __('Please configure YouTube API settings', 'yt-for-wp'), value: '' }]);
                 return;
             }
             try {
@@ -29,7 +29,7 @@ export default function Edit({ attributes, setAttributes }) {
 
                 if (data.error) {
                     console.error('YouTube API Error:', data.error.message);
-                    setPlaylists([{ label: __('Error loading playlists', 'toolkit-integration-for-youtube'), value: '' }]);
+                    setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
                     return;
                 }
 
@@ -42,11 +42,11 @@ export default function Edit({ attributes, setAttributes }) {
                         })),
                     ]);
                 } else {
-                    setPlaylists([{ label: __('No playlists found', 'toolkit-integration-for-youtube'), value: '' }]);
+                    setPlaylists([{ label: __('No playlists found', 'yt-for-wp'), value: '' }]);
                 }
             } catch (error) {
                 console.error('Error fetching playlists:', error);
-                setPlaylists([{ label: __('Error loading playlists', 'toolkit-integration-for-youtube'), value: '' }]);
+                setPlaylists([{ label: __('Error loading playlists', 'yt-for-wp'), value: '' }]);
             }
         }
 
