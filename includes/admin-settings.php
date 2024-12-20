@@ -17,7 +17,7 @@ class API_Key_Handler {
         try {
             return base64_encode(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES));
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Failed to generate encryption key: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Failed to generate encryption key: ' . $e->getMessage());
             return false;
         }
     }
@@ -51,14 +51,14 @@ class API_Key_Handler {
         }
 
         if (!function_exists('sodium_crypto_secretbox')) {
-            error_log('YouTube for WP: Sodium encryption not available');
+            error_log('Toolkit Integration for Youtube: Sodium encryption not available');
             return false;
         }
 
         try {
             $key = $this->get_encryption_key();
             if ($key === false) {
-                error_log('YouTube for WP: Failed to get encryption key');
+                error_log('Toolkit Integration for Youtube: Failed to get encryption key');
                 return false;
             }
 
@@ -67,7 +67,7 @@ class API_Key_Handler {
             
             return base64_encode($nonce . $encrypted);
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Encryption error: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Encryption error: ' . $e->getMessage());
             return false;
         }
     }
@@ -81,20 +81,20 @@ class API_Key_Handler {
         }
 
         if (!function_exists('sodium_crypto_secretbox_open')) {
-            error_log('YouTube for WP: Sodium decryption not available');
+            error_log('Toolkit Integration for Youtube: Sodium decryption not available');
             return false;
         }
 
         try {
             $key = $this->get_encryption_key();
             if ($key === false) {
-                error_log('YouTube for WP: Failed to get decryption key');
+                error_log('Toolkit Integration for Youtube: Failed to get decryption key');
                 return false;
             }
 
             $decoded = base64_decode($encrypted_api_key);
             if ($decoded === false) {
-                error_log('YouTube for WP: Failed to decode encrypted data');
+                error_log('Toolkit Integration for Youtube: Failed to decode encrypted data');
                 return false;
             }
 
@@ -103,13 +103,13 @@ class API_Key_Handler {
 
             $decrypted = sodium_crypto_secretbox_open($encrypted, $nonce, $key);
             if ($decrypted === false) {
-                error_log('YouTube for WP: Decryption failed');
+                error_log('Toolkit Integration for Youtube: Decryption failed');
                 return false;
             }
 
             return $decrypted;
         } catch (\Exception $e) {
-            error_log('YouTube for WP: Decryption error: ' . $e->getMessage());
+            error_log('Toolkit Integration for Youtube: Decryption error: ' . $e->getMessage());
             return false;
         }
     }
@@ -169,7 +169,7 @@ function register_settings() {
     // First, register the settings section
     add_settings_section(
         'yt_for_wp_main_section',
-        __('Main Settings', 'yt-for-wp'),
+        __('Main Settings', 'toolkit-integration-for-youtube'),
         '__return_false',
         'yt-for-wp-settings'
     );
@@ -177,7 +177,7 @@ function register_settings() {
     // Register API Key field
     add_settings_field(
         'yt_for_wp_api_key',
-        __('YouTube API Key', 'yt-for-wp'),
+        __('YouTube API Key', 'toolkit-integration-for-youtube'),
         function() {
             if (!current_user_can('manage_options')) {
                 return;
@@ -191,7 +191,7 @@ function register_settings() {
                 class="regular-text"
             />
             <p class="description">
-                <?php esc_html_e('Your YouTube API key will be stored securely using encryption.', 'yt-for-wp'); ?>
+                <?php esc_html_e('Your YouTube API key will be stored securely using encryption.', 'toolkit-integration-for-youtube'); ?>
             </p>
             <?php
         },
@@ -202,7 +202,7 @@ function register_settings() {
     // Register Channel ID field
     add_settings_field(
         'yt_for_wp_channel_id',
-        __('YouTube Channel ID', 'yt-for-wp'),
+        __('YouTube Channel ID', 'toolkit-integration-for-youtube'),
         function() {
             if (!current_user_can('manage_options')) {
                 return;
@@ -231,7 +231,7 @@ function register_settings() {
                     add_settings_error(
                         'yt_for_wp_api_key',
                         'invalid_permissions',
-                        __('You do not have permission to modify these settings.', 'yt-for-wp'),
+                        __('You do not have permission to modify these settings.', 'toolkit-integration-for-youtube'),
                         'error'
                     );
                     return get_api_key(); // Return existing value
@@ -249,7 +249,7 @@ function register_settings() {
                     add_settings_error(
                         'yt_for_wp_api_key',
                         'encryption_failed',
-                        __('Failed to securely store the API key. Please try again.', 'yt-for-wp'),
+                        __('Failed to securely store the API key. Please try again.', 'toolkit-integration-for-youtube'),
                         'error'
                     );
                 }
@@ -286,12 +286,12 @@ function sanitize_channel_id($input) {
 function render_settings_page() {
     if (!current_user_can('manage_options')) {
         wp_die(
-            esc_html__('You do not have sufficient permissions to access this page.', 'yt-for-wp')
+            esc_html__('You do not have sufficient permissions to access this page.', 'toolkit-integration-for-youtube')
         );
     }
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e('YouTube for WordPress Settings', 'yt-for-wp'); ?></h1>
+        <h1><?php esc_html_e('Toolkit Integration for Youtube Settings', 'toolkit-integration-for-youtube'); ?></h1>
         
         <?php
         // Show any error messages
@@ -300,7 +300,7 @@ function render_settings_page() {
         // Get and show API key status if we have one
         $api_key = get_api_key();
         $status_message = empty($api_key) ? 
-            __('Enter your YouTube API key here.', 'yt-for-wp') : 
+            __('Enter your YouTube API key here.', 'toolkit-integration-for-youtube') : 
             validate_api_key($api_key);
         
         echo '<p id="api-key-status">' . esc_html($status_message) . '</p>';
@@ -322,7 +322,7 @@ function render_settings_page() {
  */
 function validate_api_key($api_key) {
     if (empty($api_key)) {
-        return __('API Key not set', 'yt-for-wp');
+        return __('API Key not set', 'toolkit-integration-for-youtube');
     }
 
     $channel_id = get_option('yt_for_wp_channel_id');
@@ -356,7 +356,7 @@ function validate_api_key($api_key) {
 
     if (is_wp_error($response)) {
         error_log('YouTube API validation error: ' . $response->get_error_message());
-        return __('API Key validation failed', 'yt-for-wp');
+        return __('API Key validation failed', 'toolkit-integration-for-youtube');
     }
 
     $body = wp_remote_retrieve_body($response);
@@ -369,27 +369,27 @@ function validate_api_key($api_key) {
         // Check for quota exceeded
         if (isset($data['error']['errors'][0]['reason']) && 
             $data['error']['errors'][0]['reason'] === 'quotaExceeded') {
-            return __('API quota exceeded. Key may still be valid.', 'yt-for-wp');
+            return __('API quota exceeded. Key may still be valid.', 'toolkit-integration-for-youtube');
         }
         
         // Check for API key related errors
         if (isset($data['error']['errors'][0]['reason'])) {
             $reason = $data['error']['errors'][0]['reason'];
             if (in_array($reason, ['badRequest', 'invalid', 'authError'])) {
-                return __('API Key Invalid', 'yt-for-wp');
+                return __('API Key Invalid', 'toolkit-integration-for-youtube');
             }
             if ($reason === 'API_KEY_HTTP_REFERRER_BLOCKED') {
-                return __('API Key is valid but restricted to specific domains. Please check your API key settings in Google Cloud Console.', 'yt-for-wp');
+                return __('API Key is valid but restricted to specific domains. Please check your API key settings in Google Cloud Console.', 'toolkit-integration-for-youtube');
             }
         }
         
         return sprintf(
             // Translators: %s is the validation error message from the API.
-            __('API Error: %s', 'yt-for-wp'),
-            $data['error']['message'] ?? __('Unknown error', 'yt-for-wp')
+            __('API Error: %s', 'toolkit-integration-for-youtube'),
+            $data['error']['message'] ?? __('Unknown error', 'toolkit-integration-for-youtube')
         );
     }
 
     // If we got here, the key is valid
-    return __('API Key Valid', 'yt-for-wp');
+    return __('API Key Valid', 'toolkit-integration-for-youtube');
 }

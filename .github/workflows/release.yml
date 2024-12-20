@@ -22,11 +22,11 @@ jobs:
         find . -maxdepth 1 -not -name 'temp_dir' -not -name '.' -not -name '.git' -not -name '.github' -exec cp -r {} temp_dir/ \;
 
     - name: Rename directory
-      run: mv temp_dir yt-for-wp
+      run: mv temp_dir toolkit-integration-for-youtube
 
     - name: Zip the folder
       run: |
-        zip -r yt-for-wp-${{ github.event.inputs.tag }}.zip yt-for-wp \
+        zip -r toolkit-integration-for-youtube-${{ github.event.inputs.tag }}.zip toolkit-integration-for-youtube \
         -x "*.git/*" "*.github/*" \
         "yt-for-wp/package.json" \
         "yt-for-wp/package-lock.json" \

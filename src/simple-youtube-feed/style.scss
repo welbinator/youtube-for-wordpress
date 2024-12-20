@@ -78,7 +78,6 @@ button.youtube-search-button {
 /* Video Info */
 .video-info {
     padding: 1rem;
-    width: 70%;
 }
 
 .swiper-slide .video-info {
@@ -89,9 +88,6 @@ button.youtube-search-button {
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .video-description {
@@ -158,6 +154,7 @@ button.youtube-search-button {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
     overflow: hidden;
+    min-width: 600px;
 
 	.video-iframe-wrapper {
 		position: relative;
