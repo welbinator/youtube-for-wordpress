@@ -8,9 +8,9 @@ export default function Edit({ attributes, setAttributes }) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={__('YouTube Live Settings', 'yt-for-wp')}>
+                <PanelBody title={__('YouTube Live Settings', 'toolkit-integration-for-youtube')}>
                     <RangeControl
-                        label={__('Number of Videos to Show', 'yt-for-wp')}
+                        label={__('Number of Videos to Show', 'toolkit-integration-for-youtube')}
                         value={maxVideos}
                         onChange={(newMaxVideos) => setAttributes({ maxVideos: newMaxVideos })}
                         min={1}
@@ -19,7 +19,7 @@ export default function Edit({ attributes, setAttributes }) {
                 </PanelBody>
             </InspectorControls>
             <div {...useBlockProps()}>
-                <p>{__('YouTube Live Feed', 'yt-for-wp')}</p>
+                <p>{__('YouTube Live Feed', 'toolkit-integration-for-youtube')}</p>
             </div>
         </>
     );

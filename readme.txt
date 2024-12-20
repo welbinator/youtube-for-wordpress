@@ -1,4 +1,4 @@
-=== YT for WP ===
+=== Toolkit Integration for Youtube ===
 
 Contributors: highprrrr  
 Tags: youtube, video feed, video player, youtube integration, youtube channel  
