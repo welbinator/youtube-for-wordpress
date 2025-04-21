@@ -1,4 +1,4 @@
-name: Create Release for YouTube Free
+name: Create Release
 
 on:
   workflow_dispatch:
@@ -11,37 +11,49 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # Checkout code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Create temporary directory
-      run: mkdir temp_dir
+      # Create temporary directory for packaging
+      - name: Create temporary directory
+        run: mkdir temp_dir
 
-    - name: Copy files to temporary directory
-      run: |
-        find . -maxdepth 1 -not -name 'temp_dir' -not -name '.' -not -name '.git' -not -name '.github' -exec cp -r {} temp_dir/ \;
+      # Copy all project files to the temp_dir, excluding specific files/folders
+      - name: Copy all files except excluded ones
+        run: |
+          rsync -av --progress ./ temp_dir/ \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'src' \
+            --exclude 'svn' \
+            --exclude 'composer.json' \
+            --exclude 'package-lock.json' \
+            --exclude 'pacakge.json' \
+            --exclude 'node_modules' \
+            --exclude '.DS_Store' \
+            --exclude '*.log' \
+            --exclude '.gitignore' \
+            --exclude 'README.md' \
+            --exclude '.env'
 
-    - name: Rename directory
-      run: mv temp_dir toolkit-integration-for-youtube
+      # Rename directory to the desired folder name
+      - name: Rename directory
+        run: mv temp_dir toolkit-integration-for-youtube
 
-    - name: Zip the folder
-      run: |
-        zip -r toolkit-integration-for-youtube-${{ github.event.inputs.tag }}.zip toolkit-integration-for-youtube \
-        -x "*.git/*" "*.github/*" \
-        "yt-for-wp/package.json" \
-        "yt-for-wp/package-lock.json" \
-        "yt-for-wp/src/*" \
-        "yt-for-wp/node_modules/*" \
-        "yt-for-wp/.gitignore" \
-        "yt-for-wp/webpack.config.js"
+      # Zip the packaged files
+      - name: Create zip archive
+        run: |
+          zip -r toolkit-integration-for-youtube-${{ github.event.inputs.tag }}.zip toolkit-integration-for-youtube
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: yt-for-wp-${{ github.event.inputs.tag }}.zip
-        tag_name: ${{ github.event.inputs.tag }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Create a new GitHub release with the packaged zip
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: toolkit-integration-for-youtube-${{ github.event.inputs.tag }}.zip
+          tag_name: ${{ github.event.inputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   contents: write
