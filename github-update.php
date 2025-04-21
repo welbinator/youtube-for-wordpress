@@ -1,6 +1,9 @@
 <?php 
 
+namespace YouTubeForWP\GitHubUpdater;
+
 function my_plugin_check_for_updates($transient) {
+
     // Your GitHub username and repository name
     $owner = 'welbinator';
     $repo = 'youtube-for-wordpress';
@@ -22,7 +25,9 @@ function my_plugin_check_for_updates($transient) {
     $release = json_decode(wp_remote_retrieve_body($response), true);
 
     if (isset($release['tag_name']) && isset($release['assets'][0]['browser_download_url'])) {
-        $latest_version = ltrim($release['tag_name'], 'v'); // Remove "v" prefix if present
+        error_log("tag_name isset");
+        $latest_version = ltrim($release['tag_name'], 'v'); 
+        
         $download_url = $release['assets'][0]['browser_download_url'];
 
         // Plugin's current version from its header
@@ -31,7 +36,8 @@ function my_plugin_check_for_updates($transient) {
 
         // Check if a new version is available
         if (version_compare($latest_version, $current_version, '>')) {
-            $plugin_slug = plugin_basename(__FILE__);
+            $plugin_slug = plugin_basename( dirname(__FILE__) . '/youtube-for-wordpress.php' );
+            error_log("plugin slug is: " . $plugin_slug);
 
             $transient->response[$plugin_slug] = (object) [
                 'slug' => $plugin_slug,
@@ -40,11 +46,14 @@ function my_plugin_check_for_updates($transient) {
                 'url' => $release['html_url'], // Link to the release page
             ];
         }
+    } else {
+        error_log("latest version is: " . $latest_version);
     }
 
     return $transient;
 }
 add_filter('pre_set_site_transient_update_plugins', __NAMESPACE__ . '\\my_plugin_check_for_updates');
+
 
 function github_plugin_updater_user_agent($args) {
     $args['user-agent'] = 'WordPress/' . get_bloginfo('version') . '; ' . home_url();
