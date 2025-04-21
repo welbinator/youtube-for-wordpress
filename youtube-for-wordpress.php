@@ -3,7 +3,7 @@
  * Plugin Name: Toolkit Integration for Youtube
  * Plugin URI: https://ytforwp.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: James Welbes
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('YOUTUBE_FOR_WP_VERSION', '1.1.3');
+define('YOUTUBE_FOR_WP_VERSION', '1.1.4');
 define('YT_FOR_WP_PATH', plugin_dir_path(__FILE__));
 define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
@@ -82,10 +82,10 @@ require_once YT_FOR_WP_PATH . 'blocks/youtube-live/youtube-live.php';
 
 if (file_exists(YT_FOR_WP_PATH . 'github-update.php')) {
     include YT_FOR_WP_PATH . 'github-update.php';
+    error_log("github update included");
 } else {
     error_log('github-update.php not found in ' . YT_FOR_WP_PATH);
 }
-
 
 // Register settings page.
 function add_admin_menu() {
