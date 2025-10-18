@@ -3,7 +3,7 @@
  * Plugin Name: Toolkit Integration for Youtube
  * Plugin URI: https://ytforwp.com
  * Description: A toolkit for integrating YouTube functionalities into WordPress.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: James Welbes
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('YOUTUBE_FOR_WP_VERSION', '1.1.5');
+define('YOUTUBE_FOR_WP_VERSION', '1.1.6');
 define('YT_FOR_WP_PATH', plugin_dir_path(__FILE__));
 define('YT_FOR_WP_URL', plugin_dir_url(__FILE__));
 define('YT_FOR_WP_MIN_WP_VERSION', '5.8');
@@ -113,14 +113,37 @@ function yt_for_wp_enqueue_assets() {
 
     // Enqueue front-end assets
     if (!is_admin()) {
-        wp_enqueue_style('swiper-css', plugins_url('build/css/swiper-bundle.min.css', __FILE__), [], YOUTUBE_FOR_WP_VERSION);
-        wp_enqueue_script('youtube-for-wordpress-simple-youtube-feed-view', plugins_url('build/simple-youtube-feed/view.js', __FILE__), [], YOUTUBE_FOR_WP_VERSION, true);
+        // Conditionally enqueue Swiper CSS
+        if (!wp_style_is('swiper-css', 'enqueued')) {
+            wp_enqueue_style('swiper-css', 'https://unpkg.com/swiper@8/swiper-bundle.min.css', [], '8.4.7');
+        }
+
+        // Conditionally enqueue Swiper JS
+        if (!wp_script_is('swiper-js', 'enqueued')) {
+            wp_enqueue_script('swiper-js', 'https://unpkg.com/swiper@8/swiper-bundle.min.js', [], '8.4.7', true);
+        }
+
+        // Enqueue plugin script with Swiper dependency
+        wp_enqueue_script(
+            'youtube-for-wordpress-simple-youtube-feed-view',
+            plugins_url('build/simple-youtube-feed/view.js', __FILE__),
+            ['swiper-js'], // Ensure Swiper loads first
+            YOUTUBE_FOR_WP_VERSION,
+            true
+        );
         wp_localize_script('youtube-for-wordpress-simple-youtube-feed-view', 'YT_FOR_WP', $localize_data);
     } else {
         // Enqueue editor assets
-        wp_enqueue_script('youtube-for-wordpress-simple-youtube-feed-editor', plugins_url('build/simple-youtube-feed/index.js', __FILE__), ['wp-blocks', 'wp-element', 'wp-editor'], YOUTUBE_FOR_WP_VERSION, true);
+        wp_enqueue_script(
+            'youtube-for-wordpress-simple-youtube-feed-editor',
+            plugins_url('build/simple-youtube-feed/index.js', __FILE__),
+            ['wp-blocks', 'wp-element', 'wp-editor'],
+            YOUTUBE_FOR_WP_VERSION,
+            true
+        );
         wp_localize_script('youtube-for-wordpress-simple-youtube-feed-editor', 'YT_FOR_WP', $localize_data);
     }
 }
+add_action('enqueue_block_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_assets');
 add_action('enqueue_block_assets', __NAMESPACE__ . '\\yt_for_wp_enqueue_assets');
 

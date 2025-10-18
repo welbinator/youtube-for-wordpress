@@ -1,10 +1,15 @@
-import Swiper from 'swiper';
-import { Navigation, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
 document.addEventListener("DOMContentLoaded", () => {
+    const Swiper = window.Swiper; // Use global Swiper
+
+    // Check if Swiper is available
+    if (!Swiper) {
+        console.error("Swiper is not defined. Ensure swiper-bundle.min.js is loaded with handle 'swiper-js'.");
+        return;
+    }
+
+    // Log Swiper version for debugging
+    console.log("Swiper version:", Swiper.version);
+
     // Select all YouTube feed containers
     const containers = document.querySelectorAll("[id^='youtube-feed-']");
 
@@ -68,8 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    
-
     // Function to render videos
     function renderVideos(container, videos, layout) {
         if (!container) {
@@ -103,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
             videoContainer.innerHTML = `
                 <div class="swiper-wrapper">
                     ${videos
-                        .filter((video) => video.id) // Only include valid videos
+                        .filter((video) => video.id)
                         .map(
                             (video) => `
                             <div class="swiper-slide">
@@ -130,25 +133,29 @@ document.addEventListener("DOMContentLoaded", () => {
     
             container.appendChild(videoContainer);
     
-            new Swiper(videoContainer, {
-                modules: [Navigation, Pagination],
-                slidesPerView: 1, // Default for screens wider than 640px
-                spaceBetween: 10,
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                loop: true,
-                breakpoints: {
-                    640: { // For devices with a width of 640px or less
-                        slidesPerView: 3,
+            try {
+                const swiper = new Swiper(videoContainer, {
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
                     },
-                },
-            });
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    loop: true,
+                    breakpoints: {
+                        640: {
+                            slidesPerView: 1,
+                        },
+                    },
+                });
+                console.log('Carousel Swiper initialized:', swiper);
+            } catch (error) {
+                console.error('Swiper initialization failed for carousel:', error);
+            }
             
             return;
         } else if (layout === 'gallery') {
@@ -195,53 +202,50 @@ document.addEventListener("DOMContentLoaded", () => {
         
             container.appendChild(videoContainer);
         
-            const swiper = new Swiper('.gallery-carousel', {
-                modules: [Navigation, Pagination],
-                slidesPerView: 3,
-                spaceBetween: 10,
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-            });
+            try {
+                const swiper = new Swiper('.gallery-carousel', {
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                });
+                console.log('Gallery Swiper initialized:', swiper);
+            } catch (error) {
+                console.error('Swiper initialization failed for gallery:', error);
+            }
         
             // Handle thumbnail click
-            
-const thumbnails = videoContainer.querySelectorAll('.gallery-carousel-thumbnail');
-thumbnails.forEach((thumbnail) => {
-    thumbnail.addEventListener('click', (e) => {
-        const videoId = e.target.getAttribute('data-video-id');
-        const videoTitle = e.target.getAttribute('alt'); // Using the alt attribute for the title
-        const videoDescription = videos.find(video => video.id === videoId)?.description || 'No description available.';
-
-        // Update the featured video iframe
-        const featuredIframe = videoContainer.querySelector('.featured-video');
-        featuredIframe.src = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
-
-        // Update the featured video title
-        const featuredTitle = videoContainer.querySelector('.video-title');
-        if (featuredTitle) {
-            featuredTitle.textContent = videoTitle;
-        }
-
-        // Update the featured video description
-        const featuredDescription = videoContainer.querySelector('.video-description');
-        if (featuredDescription) {
-            featuredDescription.textContent = videoDescription;
-        }
-    });
-});
-
-
+            const thumbnails = videoContainer.querySelectorAll('.gallery-carousel-thumbnail');
+            thumbnails.forEach((thumbnail) => {
+                thumbnail.addEventListener('click', (e) => {
+                    const videoId = e.target.getAttribute('data-video-id');
+                    const videoTitle = e.target.getAttribute('alt');
+                    const videoDescription = videos.find(video => video.id === videoId)?.description || 'No description available.';
+        
+                    const featuredIframe = videoContainer.querySelector('.featured-video');
+                    featuredIframe.src = `https://www.youtube.com/embed/${videoId}?vq=hd720`;
+        
+                    const featuredTitle = videoContainer.querySelector('.video-title');
+                    if (featuredTitle) {
+                        featuredTitle.textContent = videoTitle;
+                    }
+        
+                    const featuredDescription = videoContainer.querySelector('.video-description');
+                    if (featuredDescription) {
+                        featuredDescription.textContent = videoDescription;
+                    }
+                });
+            });
         
             return;
         }
         
-    
         // Non-carousel layouts
         container.appendChild(videoContainer);
         videos.filter((video) => video.id).forEach((video) => {
@@ -271,14 +275,14 @@ thumbnails.forEach((thumbnail) => {
         });
     }
     
-
     // Export fetchVideos and renderVideos to the global YT_FOR_WP object
-        if (!window.YT_FOR_WP) {
-            window.YT_FOR_WP = {};
-        }
+    if (!window.YT_FOR_WP) {
+        window.YT_FOR_WP = {};
+    }
 
-        window.YT_FOR_WP.fetchVideos = fetchVideos;
-        window.YT_FOR_WP.renderVideos = renderVideos;
+    window.YT_FOR_WP.fetchVideos = fetchVideos;
+    window.YT_FOR_WP.renderVideos = renderVideos;
+
     // Process each container only once
     const processedContainers = new Set();
 
